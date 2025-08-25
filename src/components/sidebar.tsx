@@ -11,7 +11,7 @@ interface SidebarProps {
 const navigation = [
   { name: "Dashboard", icon: Home, key: "dashboard" },
   { name: "Courses", icon: BookOpen, key: "courses" },
-  { name: "Assignments", icon: ClipboardList, key: "assignments" },
+  { name: "Tasks", icon: ClipboardList, key: "tasks" },
   { name: "Grades", icon: GraduationCap, key: "grades" },
   { name: "Attendance", icon: Calendar, key: "attendance" },
   { name: "Calendar", icon: Calendar, key: "calendar" },
@@ -80,11 +80,11 @@ export function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen }: Side
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-800">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-              <span className="text-black font-semibold text-sm">JS</span>
+              <span className="text-black font-semibold text-sm">OSF</span>
             </div>
             <div>
-              <p className="text-sm font-medium">John Smith</p>
-              <p className="text-xs text-gray-400">Student ID: EQ2024001</p>
+              <p className="text-sm font-medium">Osazee Samson</p>
+              <p className="text-xs text-gray-400">Student ID: EQ2025001</p>
             </div>
           </div>
         </div>

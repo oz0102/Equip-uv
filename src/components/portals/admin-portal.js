@@ -14,5 +14,5 @@ export function AdminPortal() {
                 return _jsx(AdminDashboard, {});
         }
     };
-    return (_jsxs("div", Object.assign({ className: "flex h-screen bg-gray-50" }, { children: [_jsx(AdminSidebar, { currentPage: currentPage, setCurrentPage: setCurrentPage, isOpen: sidebarOpen, setIsOpen: setSidebarOpen }), _jsxs("div", Object.assign({ className: "flex-1 flex flex-col overflow-hidden" }, { children: [_jsx(AdminHeader, { currentPage: currentPage, setSidebarOpen: setSidebarOpen }), _jsx("main", Object.assign({ className: "flex-1 overflow-y-auto p-6" }, { children: renderPage() }))] }))] })));
+    return (_jsxs("div", { className: "flex h-screen bg-gray-50", children: [_jsx(AdminSidebar, { currentPage: currentPage, setCurrentPage: setCurrentPage, isOpen: sidebarOpen, setIsOpen: setSidebarOpen }), _jsxs("div", { className: "flex-1 flex flex-col overflow-hidden", children: [_jsx(AdminHeader, { currentPage: currentPage, setSidebarOpen: setSidebarOpen }), _jsx("main", { className: "flex-1 overflow-y-auto p-6", children: renderPage() })] })] }));
 }

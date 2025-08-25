@@ -32,7 +32,7 @@ export function ThemeProvider(_a) {
             setTheme(theme);
         },
     };
-    return (_jsx(ThemeProviderContext.Provider, Object.assign({}, props, { value: value }, { children: children })));
+    return (_jsx(ThemeProviderContext.Provider, Object.assign({}, props, { value: value, children: children })));
 }
 export const useTheme = () => {
     const context = useContext(ThemeProviderContext);

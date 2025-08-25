@@ -4,8 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Edit, Save } from "lucide-react"
+import { Edit, Save, QrCode } from "lucide-react"
 import { useState } from "react"
 
 export function Profile() {
@@ -16,11 +15,7 @@ export function Profile() {
     email: "john.smith@student.equip.academy",
     phone: "(555) 123-4567",
     address: "123 Seminary Lane, Bible City, BC 12345",
-    emergencyContactName: "Mary Smith",
-    emergencyContactRelationship: "Spouse",
-    emergencyContactPhone: "(555) 987-6543",
     bio: "Passionate about biblical studies and ministry preparation. Currently pursuing foundational training in theology and pastoral care.",
-    goals: "To complete the Foundations program and continue to the Equip program for advanced ministry training.",
   })
 
   const studentInfo = {
@@ -36,26 +31,11 @@ export function Profile() {
     academicStanding: "Good Standing",
   }
 
-  const academicHistory = [
-    {
-      semester: "Spring 2024",
-      courses: [
-        { code: "BIBL201", title: "Biblical Hermeneutics", credits: 3, grade: "B+" },
-        { code: "THEO101", title: "Introduction to Systematic Theology", credits: 4, grade: "A-" },
-        { code: "HIST201", title: "Church History", credits: 3, grade: "A" },
-        { code: "PRAC201", title: "Pastoral Care and Counseling", credits: 3, grade: "B+" },
-        { code: "THEO201", title: "Advanced Systematic Theology", credits: 4, grade: "B+" },
-      ],
-      gpa: 3.85,
-    },
-  ]
-
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
   const handleSave = () => {
-    // Here you would typically save to an API
     setIsEditing(false)
   }
 
@@ -103,15 +83,61 @@ export function Profile() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="personal" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="personal">Personal Info</TabsTrigger>
-          <TabsTrigger value="academic">Academic Info</TabsTrigger>
-          <TabsTrigger value="emergency">Emergency Contact</TabsTrigger>
-          <TabsTrigger value="history">Academic History</TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Digital ID Card */}
+        <div className="lg:col-span-1">
+          <Card className="bg-black text-white overflow-hidden">
+            <CardContent className="p-6 text-center">
+              <div className="space-y-4">
+                {/* Logo/Brand */}
+                <div className="w-16 h-16 bg-red-400 rounded-full flex items-center justify-center mx-auto">
+                  <span className="text-black font-bold text-lg">EQUIP</span>
+                </div>
+                
+                {/* Student Name */}
+                <h2 className="text-2xl font-bold text-white">
+                  {formData.firstName} {formData.lastName}
+                </h2>
+                
+                {/* Student ID */}
+                <p className="text-red-400 text-lg font-mono">
+                  DYN/DM/{studentInfo.studentId.slice(-4)}
+                </p>
+                
+                {/* QR Code Placeholder */}
+                <div className="bg-red-400 p-4 rounded-lg mx-auto w-48 h-48 flex items-center justify-center">
+                  <div className="grid grid-cols-8 gap-1 w-full h-full">
+                    {Array.from({ length: 64 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className={`${Math.random() > 0.5 ? 'bg-black' : 'bg-red-400'} rounded-sm`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Program Info */}
+                <div className="space-y-1">
+                  <p className="text-white text-lg font-semibold">{studentInfo.program}</p>
+                  <p className="text-yellow-400">{studentInfo.cohort}</p>
+                </div>
+                
+                {/* Verification Text */}
+                <p className="text-gray-300 text-sm">Scan for verification</p>
+                
+                {/* Footer */}
+                <div className="border-t border-gray-600 pt-4 space-y-1">
+                  <p className="text-xs text-gray-400">This card remains the property of DYEN.</p>
+                  <p className="text-xs text-gray-400">If found, please return to the nearest DYEN office.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-        <TabsContent value="personal" className="space-y-6">
+        {/* Combined Personal and Academic Information */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Personal Information Section */}
           <Card>
             <CardHeader>
               <CardTitle className="font-serif">Personal Information</CardTitle>
@@ -180,22 +206,10 @@ export function Profile() {
                   rows={4}
                 />
               </div>
-
-              <div>
-                <Label htmlFor="goals">Academic Goals</Label>
-                <Textarea
-                  id="goals"
-                  value={formData.goals}
-                  onChange={(e) => handleInputChange("goals", e.target.value)}
-                  disabled={!isEditing}
-                  rows={3}
-                />
-              </div>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="academic" className="space-y-6">
+          {/* Academic Information Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
@@ -257,77 +271,9 @@ export function Profile() {
               </CardContent>
             </Card>
           </div>
-        </TabsContent>
-
-        <TabsContent value="emergency" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-serif">Emergency Contact Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="emergencyName">Contact Name</Label>
-                <Input
-                  id="emergencyName"
-                  value={formData.emergencyContactName}
-                  onChange={(e) => handleInputChange("emergencyContactName", e.target.value)}
-                  disabled={!isEditing}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="emergencyRelationship">Relationship</Label>
-                <Input
-                  id="emergencyRelationship"
-                  value={formData.emergencyContactRelationship}
-                  onChange={(e) => handleInputChange("emergencyContactRelationship", e.target.value)}
-                  disabled={!isEditing}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="emergencyPhone">Phone Number</Label>
-                <Input
-                  id="emergencyPhone"
-                  value={formData.emergencyContactPhone}
-                  onChange={(e) => handleInputChange("emergencyContactPhone", e.target.value)}
-                  disabled={!isEditing}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="history" className="space-y-6">
-          {academicHistory.map((semester, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="font-serif">{semester.semester}</CardTitle>
-                  <Badge className="bg-blue-100 text-blue-800">GPA: {semester.gpa}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {semester.courses.map((course, courseIndex) => (
-                    <div key={courseIndex} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <h4 className="font-medium">
-                          {course.code}: {course.title}
-                        </h4>
-                        <p className="text-sm text-gray-600">{course.credits} Credits</p>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-green-600">{course.grade}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   )
 }
+

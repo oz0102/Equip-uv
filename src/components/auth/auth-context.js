@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
         setIsAuthenticated(false);
         localStorage.removeItem("equip-academy-user");
     };
-    return _jsx(AuthContext.Provider, Object.assign({ value: { user, login, logout, isAuthenticated } }, { children: children }));
+    return _jsx(AuthContext.Provider, { value: { user, login, logout, isAuthenticated }, children: children });
 }
 export function useAuth() {
     const context = useContext(AuthContext);

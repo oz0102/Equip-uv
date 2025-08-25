@@ -35,7 +35,7 @@ function Calendar(_a) {
                 return (_jsx(ChevronDownIcon, Object.assign({ className: cn("size-4", className) }, props)));
             }, DayButton: CalendarDayButton, WeekNumber: (_a) => {
                 var { children } = _a, props = __rest(_a, ["children"]);
-                return (_jsx("td", Object.assign({}, props, { children: _jsx("div", Object.assign({ className: "flex size-(--cell-size) items-center justify-center text-center" }, { children: children })) })));
+                return (_jsx("td", Object.assign({}, props, { children: _jsx("div", { className: "flex size-(--cell-size) items-center justify-center text-center", children: children }) })));
             } }, components) }, props)));
 }
 function CalendarDayButton(_a) {

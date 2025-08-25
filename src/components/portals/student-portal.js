@@ -3,8 +3,10 @@ import { useState } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { Dashboard } from "@/components/dashboard";
-import { Courses } from "@/components/courses";
-import { Assignments } from "@/components/assignments";
+// import { Courses } from "@/components/courses"
+// import { Assignments } from "@/components/assignments"
+import Courses from "@/components/courses";
+import Assignments from "@/components/assignments";
 import { Grades } from "@/components/grades";
 import { Attendance } from "@/components/attendance";
 import { Calendar } from "@/components/calendar";
@@ -32,5 +34,5 @@ export function StudentPortal() {
                 return _jsx(Dashboard, {});
         }
     };
-    return (_jsxs("div", Object.assign({ className: "flex h-screen bg-gray-50" }, { children: [_jsx(Sidebar, { currentPage: currentPage, setCurrentPage: setCurrentPage, isOpen: sidebarOpen, setIsOpen: setSidebarOpen }), _jsxs("div", Object.assign({ className: "flex-1 flex flex-col overflow-hidden" }, { children: [_jsx(Header, { currentPage: currentPage, setSidebarOpen: setSidebarOpen }), _jsx("main", Object.assign({ className: "flex-1 overflow-y-auto p-6" }, { children: renderPage() }))] }))] })));
+    return (_jsxs("div", { className: "flex h-screen bg-gray-50", children: [_jsx(Sidebar, { currentPage: currentPage, setCurrentPage: setCurrentPage, isOpen: sidebarOpen, setIsOpen: setSidebarOpen }), _jsxs("div", { className: "flex-1 flex flex-col overflow-hidden", children: [_jsx(Header, { currentPage: currentPage, setSidebarOpen: setSidebarOpen }), _jsx("main", { className: "flex-1 overflow-y-auto p-6", children: renderPage() })] })] }));
 }
