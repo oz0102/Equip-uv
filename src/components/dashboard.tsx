@@ -5,15 +5,15 @@ import { BookOpen, Calendar, CheckCircle, Clock, GraduationCap, TrendingUp } fro
 
 export function Dashboard() {
   const upcomingAssignments = [
-    { id: 1, title: "Biblical Hermeneutics Essay", course: "BIBL201", dueDate: "2024-01-15", status: "pending" },
-    { id: 2, title: "Theology Quiz #3", course: "THEO101", dueDate: "2024-01-18", status: "pending" },
-    { id: 3, title: "Ministry Reflection Paper", course: "PRAC301", dueDate: "2024-01-22", status: "pending" },
+    { id: 1, title: "Repentance from dead works", course: "BIBL201", dueDate: "2024-01-15", status: "pending" },
+    { id: 2, title: "Faith towards God", course: "FTG101", dueDate: "2024-01-18", status: "pending" },
+    { id: 3, title: "Baptisms", course: "BAP101", dueDate: "2024-01-22", status: "pending" },
   ]
 
   const recentGrades = [
-    { id: 1, assignment: "Church History Timeline", course: "HIST201", grade: "A-", points: "92/100" },
-    { id: 2, assignment: "Systematic Theology Exam", course: "THEO201", grade: "B+", points: "87/100" },
-    { id: 3, assignment: "Pastoral Care Case Study", course: "PRAC201", grade: "A", points: "95/100" },
+    { id: 1, assignment: "Escathology", course: "HIST201", grade: "A-", points: "92/100" },
+    { id: 2, assignment: "Water baptism", course: "THEO201", grade: "B+", points: "87/100" },
+    { id: 3, assignment: "Stewardship", course: "PRAC201", grade: "A", points: "95/100" },
   ]
 
   const todaySchedule = [
