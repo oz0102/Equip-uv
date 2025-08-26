@@ -6,7 +6,7 @@ import { Dashboard } from "@/components/dashboard";
 // import { Courses } from "@/components/courses"
 // import { Assignments } from "@/components/assignments"
 import Courses from "@/components/courses";
-import Assignments from "@/components/assignments";
+import Assignments from "@/components/tasks";
 import { Grades } from "@/components/grades";
 import { Attendance } from "@/components/attendance";
 import { Calendar } from "@/components/calendar";
