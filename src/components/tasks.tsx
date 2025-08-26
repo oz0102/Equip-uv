@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Calendar } from "@/components/ui/calendar"
-import { Calendar as CalendarIcon, Clock, FileText, AlertCircle, CheckCircle, Upload, BookOpen, Users, GraduationCap, ArrowLeft, Play, Download, Send, Filter, CalendarDays } from "lucide-react"
+import { Calendar as CalendarIcon, Clock, FileText, AlertCircle, CheckCircle, Upload, BookOpen, Users, GraduationCap, ArrowLeft, Play, Download, Send, Filter, CalendarDays, Eye } from "lucide-react"
 import { useState } from "react"
 
 // Type definitions
@@ -34,6 +34,8 @@ interface Task {
   videoThumbnail?: string
   resourceUrl?: string
   resourceType?: string
+  submittedContent?: string // Added for student submissions
+  submittedFiles?: string[] // Added for submitted file attachments
 }
 
 interface OverdueTask {
@@ -183,7 +185,9 @@ export default function TasksCenter() {
       description: "Create a comprehensive timeline of major events, figures, and theological developments in the early church (33-451 CE).",
       instructions: "Include at least 75 significant events with dates, brief descriptions, and historical significance. Use visual elements and maintain chronological accuracy.",
       attachments: ["timeline-template.pdf", "resource-list.pdf"],
-      submittedDateFormatted: "August 19, 2025"
+      submittedDateFormatted: "August 19, 2025",
+      submittedContent: "I have completed the comprehensive timeline covering the early church period from 33-451 CE. My timeline includes 78 significant events, starting with the Crucifixion and Resurrection of Jesus Christ (30-33 CE) and concluding with the Council of Chalcedon (451 CE).\n\nKey sections include:\n\n1. Apostolic Period (33-100 CE)\n- Pentecost and the birth of the church\n- Paul's missionary journeys\n- Destruction of Jerusalem (70 CE)\n- Deaths of the apostles\n\n2. Post-Apostolic Period (100-300 CE)\n- Early church fathers (Clement, Ignatius, Polycarp)\n- Major persecutions under Roman emperors\n- Development of the New Testament canon\n- Rise of Christian apologetics\n\n3. Imperial Period (300-451 CE)\n- Constantine's conversion and Edict of Milan\n- Major ecumenical councils\n- Theological controversies (Arianism, Nestorianism)\n- Establishment of Christianity as state religion\n\nEach event includes the date, key figures involved, brief description, and its significance for church development. I've used color coding for different types of events (theological, political, persecution, councils) and included maps showing the geographical spread of Christianity.",
+      submittedFiles: ["timeline-visual.pdf", "research-sources.docx", "event-details.xlsx"]
     },
     {
       id: 6,
@@ -204,7 +208,9 @@ export default function TasksCenter() {
       instructions: "Choose from Luther, Calvin, Zwingli, or Cranmer. Analyze their key theological positions, historical context, and contemporary relevance. Minimum 3500 words with primary source integration.",
       attachments: ["paper-guidelines.pdf", "citation-style.pdf"],
       submittedDateFormatted: "August 14, 2025",
-      feedback: "Excellent analysis of Calvin's doctrine of predestination. Strong use of primary sources and clear argumentation. Consider expanding on contemporary applications."
+      feedback: "Excellent analysis of Calvin's doctrine of predestination. Strong use of primary sources and clear argumentation. Consider expanding on contemporary applications.",
+      submittedContent: "John Calvin and the Doctrine of Predestination: Theological Foundations and Lasting Impact\n\n[This is a preview of the submitted paper]\n\nIntroduction\n\nJohn Calvin (1509-1564) stands as one of the most influential theologians of the Protestant Reformation, whose systematic approach to Christian doctrine continues to shape Protestant Christianity today. This paper examines Calvin's theological contributions, with particular focus on his doctrine of predestination, analyzing both its historical development and contemporary relevance...\n\n[The full 3,847-word paper continues with detailed analysis of Calvin's theological system, including extensive citations from the Institutes of the Christian Religion and other primary sources.]",
+      submittedFiles: ["calvin-paper-final.docx", "primary-sources-bibliography.pdf"]
     }
   ]
 
@@ -435,6 +441,58 @@ export default function TasksCenter() {
             </Card>
           )}
 
+          {/* Student Submission Display - NEW SECTION */}
+          {selectedTask.status === 'submitted' && selectedTask.submittedContent && (
+            <Card className="shadow-lg border-blue-200">
+              <CardHeader>
+                <CardTitle className="flex items-center text-blue-800">
+                  <Eye className="h-5 w-5 mr-2" />
+                  Student Submission
+                </CardTitle>
+                <p className="text-sm text-blue-600 mt-1">
+                  Submitted on {selectedTask.submittedDateFormatted}
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 max-h-96 overflow-y-auto">
+                  <div className="prose prose-sm max-w-none">
+                    <div className="whitespace-pre-wrap text-slate-700 leading-relaxed">
+                      {selectedTask.submittedContent}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Submitted Files */}
+                {selectedTask.submittedFiles && selectedTask.submittedFiles.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-blue-800">Submitted Files:</h4>
+                    <div className="space-y-2">
+                      {selectedTask.submittedFiles.map((file, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="flex items-center">
+                            <FileText className="h-4 w-4 mr-2 text-blue-600" />
+                            <span className="text-blue-700">{file}</span>
+                          </div>
+                          <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100">
+                            <Download className="h-4 w-4 mr-1" />
+                            Download
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-center pt-4 border-t border-blue-200">
+                  <div className="flex items-center text-blue-600">
+                    <CheckCircle className="h-5 w-5 mr-2" />
+                    <span className="font-medium">Awaiting instructor review</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Instructions */}
           <Card className="shadow-lg">
             <CardHeader>
@@ -515,7 +573,7 @@ export default function TasksCenter() {
           )}
 
           {/* Submission Status */}
-          {selectedTask.status === 'submitted' && (
+          {selectedTask.status === 'submitted' && !selectedTask.submittedContent && (
             <Card className="shadow-lg border-blue-200 bg-blue-50">
               <CardContent className="p-6">
                 <div className="flex items-center justify-center">
@@ -547,6 +605,32 @@ export default function TasksCenter() {
                   <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
                     <h4 className="font-semibold text-emerald-800 mb-2">Instructor Feedback:</h4>
                     <p className="text-emerald-700">{selectedTask.feedback}</p>
+                  </div>
+                )}
+
+                {/* Display submitted content for graded tasks too */}
+                {selectedTask.submittedContent && (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-emerald-800">Your Submission:</h4>
+                    <div className="bg-gray-50 p-4 rounded-lg border max-h-64 overflow-y-auto">
+                      <div className="prose prose-sm max-w-none">
+                        <div className="whitespace-pre-wrap text-slate-700 leading-relaxed">
+                          {selectedTask.submittedContent.length > 500 
+                            ? selectedTask.submittedContent.substring(0, 500) + "..."
+                            : selectedTask.submittedContent}
+                        </div>
+                      </div>
+                    </div>
+                    {selectedTask.submittedFiles && selectedTask.submittedFiles.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedTask.submittedFiles.map((file, index) => (
+                          <Badge key={index} variant="outline" className="bg-gray-100">
+                            <FileText className="h-3 w-3 mr-1" />
+                            {file}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -911,7 +995,15 @@ export default function TasksCenter() {
                         </CardTitle>
                         <p className="text-sm text-slate-600 mt-1">{task.course} • {task.instructor}</p>
                       </div>
-                      <Badge className="bg-blue-100 text-blue-800 border-blue-200">submitted</Badge>
+                      <div className="flex items-center space-x-2">
+                        <Badge className="bg-blue-100 text-blue-800 border-blue-200">submitted</Badge>
+                        {task.submittedContent && (
+                          <Badge variant="outline" className="bg-green-50 text-green-700">
+                            <Eye className="h-3 w-3 mr-1" />
+                            Has Content
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -927,6 +1019,18 @@ export default function TasksCenter() {
                         {task.points ? `${task.points} points` : 'No points'}
                       </div>
                     </div>
+
+                    {/* Show preview of submitted content */}
+                    {task.submittedContent && (
+                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                        <h4 className="text-sm font-medium text-blue-800 mb-2">Submission Preview:</h4>
+                        <p className="text-sm text-blue-700 line-clamp-2">
+                          {task.submittedContent.length > 120 
+                            ? task.submittedContent.substring(0, 120) + "..."
+                            : task.submittedContent}
+                        </p>
+                      </div>
+                    )}
 
                     <div className="flex items-center justify-between pt-4 border-t">
                       <div className="text-blue-600 font-medium">Awaiting grade...</div>
@@ -1024,3 +1128,4 @@ export default function TasksCenter() {
     </div>
   )
 }
+
