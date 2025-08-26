@@ -37,7 +37,7 @@ export function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Current GPA</p>
-                <p className="text-2xl font-bold text-black">3.85</p>
+                <p className="text-2xl font-bold text-black">3.95</p>
               </div>
               <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <TrendingUp className="h-6 w-6 text-green-600" />
