@@ -9,8 +9,9 @@ import { Attendance } from "@/components/attendance"
 import { Tracker } from "@/components/tracker"
 import { Calendar } from "@/components/calendar"
 import { Profile } from "@/components/profile"
+import TasksCenter from "@/components/tasks"
 
-type Page = "dashboard" | "courses" | "assignments" | "grades" | "attendance" | "tracker" | "calendar" | "profile"
+type Page = "dashboard" | "courses" | "tasks" | "grades" | "attendance" | "tracker" | "calendar" | "profile"
 
 export function StudentPortal() {
   const [currentPage, setCurrentPage] = useState<Page>("dashboard")
@@ -22,8 +23,8 @@ export function StudentPortal() {
         return <Dashboard />
       case "courses":
         return <Courses />
-      case "assignments":
-        return <Assignments />
+      case "tasks":
+        return <TasksCenter />
       case "grades":
         return <Grades />
       case "attendance":

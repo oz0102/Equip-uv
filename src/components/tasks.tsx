@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Calendar, Clock, FileText, AlertCircle, CheckCircle, Upload, BookOpen, Users, GraduationCap, ArrowLeft, Play, Download, Send, Filter, CalendarIcon } from "lucide-react"
+import { Calendar } from "@/components/ui/calendar"
+import { Calendar as CalendarIcon, Clock, FileText, AlertCircle, CheckCircle, Upload, BookOpen, Users, GraduationCap, ArrowLeft, Play, Download, Send, Filter, CalendarDays } from "lucide-react"
 import { useState } from "react"
 
 // Type definitions
@@ -50,8 +51,48 @@ interface OverdueTask {
 export default function TasksCenter() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [submissionText, setSubmissionText] = useState("")
-  const [dateFilter, setDateFilter] = useState("")
-  const [showDateFilter, setShowDateFilter] = useState(false)
+  
+  // Enhanced date filtering state (similar to tracker.tsx)
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+  const [filterMode, setFilterMode] = useState<"day" | "week">("day")
+  const [showCalendar, setShowCalendar] = useState(false)
+
+  // Helper functions for date manipulation (from tracker.tsx)
+  const getWeekStart = (date: Date) => {
+    const d = new Date(date)
+    const day = d.getDay()
+    const diff = d.getDate() - day
+    return new Date(d.setDate(diff))
+  }
+
+  const getWeekEnd = (date: Date) => {
+    const weekStart = getWeekStart(date)
+    const weekEnd = new Date(weekStart)
+    weekEnd.setDate(weekStart.getDate() + 6)
+    return weekEnd
+  }
+
+  const formatDateRange = (start: Date, end: Date) => {
+    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
+    return `${start.toLocaleDateString('en-US', options)} - ${end.toLocaleDateString('en-US', options)}`
+  }
+
+  const getCurrentDisplayDate = () => {
+    if (!selectedDate) return "Today"
+    
+    if (filterMode === "day") {
+      return selectedDate.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        month: 'long', 
+        day: 'numeric',
+        year: 'numeric'
+      })
+    } else {
+      const weekStart = getWeekStart(selectedDate)
+      const weekEnd = getWeekEnd(selectedDate)
+      return `Week of ${formatDateRange(weekStart, weekEnd)}`
+    }
+  }
 
   const tasks: Task[] = [
     {
@@ -257,11 +298,29 @@ export default function TasksCenter() {
     }
   }
 
+  // Enhanced filtering function
   const filteredTasks = (taskList: Task[]) => {
-    if (!dateFilter) return taskList
-    return taskList.filter(task => 
-      task.dueDate && task.dueDate.includes(dateFilter)
-    )
+    if (!selectedDate) return taskList
+    
+    return taskList.filter(task => {
+      if (!task.dueDate) return false // Only filter tasks with due dates
+      
+      const taskDate = new Date(task.dueDate)
+      
+      if (filterMode === "day") {
+        // Filter by specific day
+        return (
+          taskDate.getFullYear() === selectedDate.getFullYear() &&
+          taskDate.getMonth() === selectedDate.getMonth() &&
+          taskDate.getDate() === selectedDate.getDate()
+        )
+      } else {
+        // Filter by week
+        const weekStart = getWeekStart(selectedDate)
+        const weekEnd = getWeekEnd(selectedDate)
+        return taskDate >= weekStart && taskDate <= weekEnd
+      }
+    })
   }
 
   // Task Details View
@@ -306,7 +365,7 @@ export default function TasksCenter() {
               {selectedTask.dueDate && (
                 <div className="flex items-center space-x-6 text-slate-600">
                   <div className="flex items-center">
-                    <Calendar className="h-5 w-5 mr-2" />
+                    <CalendarIcon className="h-5 w-5 mr-2" />
                     Due: {selectedTask.dueDateFormatted}
                   </div>
                   <div className="flex items-center">
@@ -560,40 +619,143 @@ export default function TasksCenter() {
           </Card>
         </div>
 
-        {/* Date Filter */}
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold text-slate-800">Your Tasks</h2>
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              onClick={() => setShowDateFilter(!showDateFilter)}
-              className="flex items-center"
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              Filter by Date
-            </Button>
-            {showDateFilter && (
+        {/* Enhanced Date Filter Section (similar to tracker.tsx) */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="font-serif text-lg flex items-center">
+                <CalendarDays className="h-5 w-5 mr-2" />
+                Task Date Filter
+              </CardTitle>
               <div className="flex items-center space-x-2">
-                <CalendarIcon className="h-4 w-4 text-slate-600" />
-                <Input
-                  type="date"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                  className="w-40"
-                />
-                {dateFilter && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setDateFilter("")}
-                  >
-                    Clear
-                  </Button>
-                )}
+                <Button
+                  variant={filterMode === "day" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFilterMode("day")}
+                >
+                  Daily View
+                </Button>
+                <Button
+                  variant={filterMode === "week" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFilterMode("week")}
+                >
+                  Weekly View
+                </Button>
               </div>
-            )}
-          </div>
-        </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-1">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">Selected {filterMode === "day" ? "Date" : "Week"}</h4>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowCalendar(!showCalendar)}
+                    >
+                      <Filter className="h-4 w-4 mr-2" />
+                      {showCalendar ? "Hide" : "Show"} Calendar
+                    </Button>
+                  </div>
+                  
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm font-medium text-blue-800">
+                      {getCurrentDisplayDate()}
+                    </p>
+                    {filterMode === "week" && selectedDate && (
+                      <p className="text-xs text-blue-600 mt-1">
+                        {getWeekStart(selectedDate).toLocaleDateString()} - {getWeekEnd(selectedDate).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col space-y-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const today = new Date()
+                        setSelectedDate(today)
+                      }}
+                    >
+                      Go to Today
+                    </Button>
+                    
+                    {filterMode === "week" && (
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (selectedDate) {
+                              const prevWeek = new Date(selectedDate)
+                              prevWeek.setDate(selectedDate.getDate() - 7)
+                              setSelectedDate(prevWeek)
+                            }
+                          }}
+                        >
+                          Previous Week
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (selectedDate) {
+                              const nextWeek = new Date(selectedDate)
+                              nextWeek.setDate(selectedDate.getDate() + 7)
+                              setSelectedDate(nextWeek)
+                            }
+                          }}
+                        >
+                          Next Week
+                        </Button>
+                      </div>
+                    )}
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedDate(undefined)}
+                    >
+                      Clear Filter
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {showCalendar && (
+                <div className="lg:col-span-2">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    className="rounded-md border w-full"
+                  />
+                </div>
+              )}
+              
+              {!showCalendar && (
+                <div className="lg:col-span-2">
+                  <div className="p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 text-center">
+                    <CalendarDays className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600 mb-2">
+                      {filterMode === "day" 
+                        ? "Filter tasks by specific due date" 
+                        : "Filter tasks by due dates within the selected week"
+                      }
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Click "Show Calendar" to select a different {filterMode === "day" ? "date" : "week"}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Task Tabs */}
         <Tabs defaultValue="pending" className="w-full">
@@ -602,13 +764,13 @@ export default function TasksCenter() {
               Overdue ({overdueTasks.length})
             </TabsTrigger>
             <TabsTrigger value="pending" className="data-[state=active]:bg-amber-50 data-[state=active]:text-amber-700">
-              Pending ({pendingTasks.length})
+              Pending ({filteredTasks(pendingTasks).length})
             </TabsTrigger>
             <TabsTrigger value="submitted" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">
-              Submitted ({submittedTasks.length})
+              Submitted ({filteredTasks(submittedTasks).length})
             </TabsTrigger>
             <TabsTrigger value="completed" className="data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700">
-              Completed ({gradedTasks.length})
+              Completed ({filteredTasks(gradedTasks).length})
             </TabsTrigger>
           </TabsList>
 
@@ -636,737 +798,229 @@ export default function TasksCenter() {
 
           {/* Pending Tab */}
           <TabsContent value="pending" className="space-y-6 mt-6">
-            {filteredTasks(pendingTasks).map((task) => (
-              <Card 
-                key={task.id} 
-                className="shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-amber-400 cursor-pointer"
-                onClick={() => handleTaskClick(task)}
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="font-serif text-lg flex items-center text-slate-800">
-                        {getTypeIcon(task.type)}
-                        <span className="ml-2">{task.title}</span>
-                        {task.taskType === 'video' && (
-                          <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-700">
-                            Video
-                          </Badge>
-                        )}
-                        {task.taskType === 'resource' && (
-                          <Badge variant="outline" className="ml-2 bg-green-50 text-green-700">
-                            Resource
-                          </Badge>
-                        )}
-                      </CardTitle>
-                      <p className="text-sm text-slate-600 mt-1">{task.course} • {task.instructor}</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge className={`${getPriorityColor(task.priority)} bg-white border`}>
-                        {task.priority} priority
-                      </Badge>
-                      {task.points && (
-                        <Badge className="bg-slate-100 text-slate-700">{task.points} pts</Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-slate-700">{task.description}</p>
-                  
-                  <div className="flex items-center space-x-6 text-sm text-slate-600">
-                    {task.dueDate && (
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        Due: {task.dueDateFormatted}
-                      </div>
-                    )}
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-2" />
-                      {task.estimatedTime}
-                    </div>
-                    {task.daysRemaining && (
-                      <div className="text-amber-600 font-medium">
-                        {task.daysRemaining} days remaining
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between pt-4 border-t">
-                    <div className="text-sm text-slate-600">
-                      {task.attachments.length > 0 && (
-                        <span>{task.attachments.length} attachment(s)</span>
-                      )}
-                    </div>
-                    <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white">
-                      View Details
-                    </Button>
-                  </div>
-                </CardContent>
+            {filteredTasks(pendingTasks).length === 0 ? (
+              <Card className="p-8 text-center">
+                <CalendarDays className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-600 mb-2">No pending tasks found</h3>
+                <p className="text-sm text-gray-500">
+                  {selectedDate 
+                    ? `No tasks due ${filterMode === "day" ? "on this date" : "in this week"}.`
+                    : "Clear the date filter to see all pending tasks."
+                  }
+                </p>
               </Card>
-            ))}
+            ) : (
+              filteredTasks(pendingTasks).map((task) => (
+                <Card 
+                  key={task.id} 
+                  className="shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-amber-400 cursor-pointer"
+                  onClick={() => handleTaskClick(task)}
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="font-serif text-lg flex items-center text-slate-800">
+                          {getTypeIcon(task.type)}
+                          <span className="ml-2">{task.title}</span>
+                          {task.taskType === 'video' && (
+                            <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-700">
+                              Video
+                            </Badge>
+                          )}
+                          {task.taskType === 'resource' && (
+                            <Badge variant="outline" className="ml-2 bg-green-50 text-green-700">
+                              Resource
+                            </Badge>
+                          )}
+                        </CardTitle>
+                        <p className="text-sm text-slate-600 mt-1">{task.course} • {task.instructor}</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge className={`${getPriorityColor(task.priority)} bg-white border`}>
+                          {task.priority} priority
+                        </Badge>
+                        {task.points && (
+                          <Badge className="bg-slate-100 text-slate-700">{task.points} pts</Badge>
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-slate-700">{task.description}</p>
+                    
+                    <div className="flex items-center space-x-6 text-sm text-slate-600">
+                      {task.dueDate && (
+                        <div className="flex items-center">
+                          <CalendarIcon className="h-4 w-4 mr-2" />
+                          Due: {task.dueDateFormatted}
+                        </div>
+                      )}
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-2" />
+                        {task.estimatedTime}
+                      </div>
+                      {task.daysRemaining && (
+                        <div className="text-amber-600 font-medium">
+                          {task.daysRemaining} days remaining
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 border-t">
+                      <div className="text-sm text-slate-600">
+                        {task.attachments.length > 0 && (
+                          <span>{task.attachments.length} attachment(s)</span>
+                        )}
+                      </div>
+                      <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white">
+                        View Details
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </TabsContent>
 
           {/* Submitted Tab */}
           <TabsContent value="submitted" className="space-y-6 mt-6">
-            {filteredTasks(submittedTasks).map((task) => (
-              <Card 
-                key={task.id} 
-                className="shadow-lg border-l-4 border-l-blue-400 cursor-pointer"
-                onClick={() => handleTaskClick(task)}
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="font-serif text-lg flex items-center text-slate-800">
-                        {getTypeIcon(task.type)}
-                        <span className="ml-2">{task.title}</span>
-                      </CardTitle>
-                      <p className="text-sm text-slate-600 mt-1">{task.course} • {task.instructor}</p>
-                    </div>
-                    <Badge className="bg-blue-100 text-blue-800 border-blue-200">submitted</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-slate-700">{task.description}</p>
-
-                  <div className="flex items-center space-x-4 text-sm text-slate-600">
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Submitted: {task.submittedDateFormatted}
-                    </div>
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-2" />
-                      {task.points ? `${task.points} points` : 'No points'}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-4 border-t">
-                    <div className="text-blue-600 font-medium">Awaiting grade...</div>
-                    <Button variant="outline" size="sm">
-                      View Details
-                    </Button>
-                  </div>
-                </CardContent>
+            {filteredTasks(submittedTasks).length === 0 ? (
+              <Card className="p-8 text-center">
+                <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-600 mb-2">No submitted tasks found</h3>
+                <p className="text-sm text-gray-500">
+                  {selectedDate 
+                    ? `No submitted tasks ${filterMode === "day" ? "on this date" : "in this week"}.`
+                    : "Clear the date filter to see all submitted tasks."
+                  }
+                </p>
               </Card>
-            ))}
-          </TabsContent>
+            ) : (
+              filteredTasks(submittedTasks).map((task) => (
+                <Card 
+                  key={task.id} 
+                  className="shadow-lg border-l-4 border-l-blue-400 cursor-pointer"
+                  onClick={() => handleTaskClick(task)}
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="font-serif text-lg flex items-center text-slate-800">
+                          {getTypeIcon(task.type)}
+                          <span className="ml-2">{task.title}</span>
+                        </CardTitle>
+                        <p className="text-sm text-slate-600 mt-1">{task.course} • {task.instructor}</p>
+                      </div>
+                      <Badge className="bg-blue-100 text-blue-800 border-blue-200">submitted</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-slate-700">{task.description}</p>
 
-          {/* Completed Tab */}
-          <TabsContent value="completed" className="space-y-6 mt-6">
-            {filteredTasks(gradedTasks).map((task) => (
-              <Card 
-                key={task.id} 
-                className="shadow-lg border-l-4 border-l-emerald-400 cursor-pointer"
-                onClick={() => handleTaskClick(task)}
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="font-serif text-lg flex items-center text-slate-800">
-                        {getTypeIcon(task.type)}
-                        <span className="ml-2">{task.title}</span>
-                      </CardTitle>
-                      <p className="text-sm text-slate-600 mt-1">{task.course} • {task.instructor}</p>
+                    <div className="flex items-center space-x-4 text-sm text-slate-600">
+                      <div className="flex items-center">
+                        <CalendarIcon className="h-4 w-4 mr-2" />
+                        Submitted: {task.submittedDateFormatted}
+                      </div>
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-2" />
+                        {task.points ? `${task.points} points` : 'No points'}
+                      </div>
                     </div>
-                    <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200">completed</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-slate-700">{task.description}</p>
 
-                  {task.feedback && (
-                    <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
-                      <h4 className="font-semibold text-emerald-800 mb-2">Instructor Feedback:</h4>
-                      <p className="text-sm text-emerald-700">{task.feedback}</p>
-                    </div>
-                  )}
-
-                  <div className="flex items-center space-x-4 text-sm text-slate-600">
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Submitted: {task.submittedDateFormatted}
-                    </div>
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-2" />
-                      {task.points ? `${task.points} points` : 'No points'}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-4 border-t">
-                    <div className="flex items-center space-x-4">
-                      {task.grade && task.points ? (
-                        <div className="text-2xl font-bold">
-                          <span className="text-emerald-600">
-                            {task.grade}/{task.points}
-                          </span>
-                          <span className="text-lg text-slate-600 ml-2">
-                            ({Math.round((task.grade / task.points) * 100)}%)
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="text-emerald-600 font-medium">Task Completed</div>
-                      )}
-                    </div>
-                    <div className="space-x-2">
+                    <div className="flex items-center justify-between pt-4 border-t">
+                      <div className="text-blue-600 font-medium">Awaiting grade...</div>
                       <Button variant="outline" size="sm">
                         View Details
                       </Button>
                     </div>
-                  </div>
-                </CardContent>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </TabsContent>
+
+          {/* Completed Tab */}
+          <TabsContent value="completed" className="space-y-6 mt-6">
+            {filteredTasks(gradedTasks).length === 0 ? (
+              <Card className="p-8 text-center">
+                <CheckCircle className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-600 mb-2">No completed tasks found</h3>
+                <p className="text-sm text-gray-500">
+                  {selectedDate 
+                    ? `No completed tasks ${filterMode === "day" ? "on this date" : "in this week"}.`
+                    : "Clear the date filter to see all completed tasks."
+                  }
+                </p>
               </Card>
-            ))}
+            ) : (
+              filteredTasks(gradedTasks).map((task) => (
+                <Card 
+                  key={task.id} 
+                  className="shadow-lg border-l-4 border-l-emerald-400 cursor-pointer"
+                  onClick={() => handleTaskClick(task)}
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="font-serif text-lg flex items-center text-slate-800">
+                          {getTypeIcon(task.type)}
+                          <span className="ml-2">{task.title}</span>
+                        </CardTitle>
+                        <p className="text-sm text-slate-600 mt-1">{task.course} • {task.instructor}</p>
+                      </div>
+                      <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200">completed</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-slate-700">{task.description}</p>
+
+                    {task.feedback && (
+                      <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                        <h4 className="font-semibold text-emerald-800 mb-2">Instructor Feedback:</h4>
+                        <p className="text-sm text-emerald-700">{task.feedback}</p>
+                      </div>
+                    )}
+
+                    <div className="flex items-center space-x-4 text-sm text-slate-600">
+                      <div className="flex items-center">
+                        <CalendarIcon className="h-4 w-4 mr-2" />
+                        Submitted: {task.submittedDateFormatted}
+                      </div>
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-2" />
+                        {task.points ? `${task.points} points` : 'No points'}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 border-t">
+                      <div className="flex items-center space-x-4">
+                        {task.grade && task.points ? (
+                          <div className="text-2xl font-bold">
+                            <span className="text-emerald-600">
+                              {task.grade}/{task.points}
+                            </span>
+                            <span className="text-lg text-slate-600 ml-2">
+                              ({Math.round((task.grade / task.points) * 100)}%)
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="text-emerald-600 font-medium">Task Completed</div>
+                        )}
+                      </div>
+                      <div className="space-x-2">
+                        <Button variant="outline" size="sm">
+                          View Details
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </TabsContent>
         </Tabs>
       </div>
     </div>
   )
 }
-
-
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Badge } from "@/components/ui/badge"
-// import { Button } from "@/components/ui/button"
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-// import { Calendar, Clock, FileText, AlertCircle, CheckCircle, Upload, Star, BookOpen, Users, GraduationCap } from "lucide-react"
-// import { useState } from "react"
-
-// // Type definitions
-// interface Assignment {
-//   id: number
-//   title: string
-//   course: string
-//   instructor: string
-//   type: string
-//   dueDate: string
-//   dueDateFormatted: string
-//   submittedAt: string | null
-//   status: string
-//   priority: string
-//   points: number
-//   estimatedTime: string
-//   description: string
-//   instructions: string
-//   attachments: string[]
-//   daysRemaining?: number
-//   submittedDateFormatted?: string
-//   grade?: number
-//   feedback?: string
-// }
-
-// interface OverdueAssignment {
-//   id: number
-//   title: string
-//   course: string
-//   instructor: string
-//   type: string
-//   dueDate: string
-//   points: number
-//   daysOverdue: number
-//   priority: string
-// }
-
-// export default function BiblicalAssignments() {
-//   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
-
-//   const assignments: Assignment[] = [
-//     {
-//       id: 1,
-//       title: "The Parable of the Good Samaritan: Contextual Analysis",
-//       course: "BIBL301 - New Testament Exegesis",
-//       instructor: "Dr. Sarah Henderson",
-//       type: "exegesis",
-//       dueDate: "2025-09-15T23:59:00",
-//       dueDateFormatted: "September 15, 2025",
-//       submittedAt: null,
-//       status: "pending",
-//       priority: "high",
-//       points: 120,
-//       estimatedTime: "8-10 hours",
-//       description: "Conduct a thorough exegetical analysis of Luke 10:25-37, examining the historical, cultural, and theological context of the Good Samaritan parable.",
-//       instructions: "Your analysis should include: (1) Historical-grammatical interpretation, (2) Cultural background research, (3) Theological implications, and (4) Contemporary application principles. Use at least 8 scholarly sources.",
-//       attachments: ["rubric.pdf", "source-guidelines.pdf", "sample-exegesis.pdf"],
-//       daysRemaining: 22
-//     },
-//     {
-//       id: 2,
-//       title: "Systematic Theology Midterm Examination",
-//       course: "THEO201 - Systematic Theology II",
-//       instructor: "Prof. Michael Roberts",
-//       type: "exam",
-//       dueDate: "2025-09-10T14:00:00",
-//       dueDateFormatted: "September 10, 2025",
-//       submittedAt: null,
-//       status: "pending",
-//       priority: "high",
-//       points: 200,
-//       estimatedTime: "3 hours",
-//       description: "Comprehensive examination covering soteriology, pneumatology, and ecclesiology from the first half of the semester.",
-//       instructions: "The exam will consist of short answer questions (40%), essay questions (40%), and biblical application scenarios (20%). Closed book examination administered in classroom.",
-//       attachments: ["study-guide.pdf", "key-terms.pdf"],
-//       daysRemaining: 17
-//     },
-//     {
-//       id: 3,
-//       title: "Ministry Leadership Case Study",
-//       course: "PRAC401 - Pastoral Leadership",
-//       instructor: "Rev. Dr. James Wilson",
-//       type: "project",
-//       dueDate: "2025-09-25T23:59:00",
-//       dueDateFormatted: "September 25, 2025",
-//       submittedAt: null,
-//       status: "pending",
-//       priority: "medium",
-//       points: 100,
-//       estimatedTime: "6-8 hours",
-//       description: "Analyze a real-world church leadership challenge and propose biblical solutions using course principles.",
-//       instructions: "Select from provided case studies or propose your own (with approval). Apply leadership theories from course readings and integrate biblical principles. Include implementation plan and potential obstacles.",
-//       attachments: ["case-studies.pdf", "template.docx"],
-//       daysRemaining: 32
-//     },
-//     {
-//       id: 4,
-//       title: "Church History Timeline Project",
-//       course: "HIST301 - Early Church History",
-//       instructor: "Dr. Rachel Martinez",
-//       type: "project",
-//       dueDate: "2025-08-20T23:59:00",
-//       dueDateFormatted: "August 20, 2025",
-//       submittedAt: "2025-08-19T16:30:00",
-//       status: "submitted",
-//       priority: "medium",
-//       points: 85,
-//       estimatedTime: "10-12 hours",
-//       description: "Create a comprehensive timeline of major events, figures, and theological developments in the early church (33-451 CE).",
-//       instructions: "Include at least 75 significant events with dates, brief descriptions, and historical significance. Use visual elements and maintain chronological accuracy.",
-//       attachments: ["timeline-template.pdf", "resource-list.pdf"],
-//       submittedDateFormatted: "August 19, 2025"
-//     },
-//     {
-//       id: 5,
-//       title: "Reformation Theology Research Paper",
-//       course: "HIST201 - Church History Survey",
-//       instructor: "Prof. David Thompson",
-//       type: "essay",
-//       dueDate: "2025-08-15T23:59:00",
-//       dueDateFormatted: "August 15, 2025",
-//       submittedAt: "2025-08-14T20:45:00",
-//       status: "graded",
-//       priority: "medium",
-//       points: 150,
-//       grade: 138,
-//       estimatedTime: "12-15 hours",
-//       description: "Examine the theological contributions of a major Reformation figure and their lasting impact on Protestant Christianity.",
-//       instructions: "Choose from Luther, Calvin, Zwingli, or Cranmer. Analyze their key theological positions, historical context, and contemporary relevance. Minimum 3500 words with primary source integration.",
-//       attachments: ["paper-guidelines.pdf", "citation-style.pdf"],
-//       submittedDateFormatted: "August 14, 2025",
-//       feedback: "Excellent analysis of Calvin's doctrine of predestination. Strong use of primary sources and clear argumentation. Consider expanding on contemporary applications."
-//     },
-//     {
-//       id: 6,
-//       title: "Biblical Counseling Practicum",
-//       course: "COUN301 - Biblical Counseling Methods",
-//       instructor: "Dr. Lisa Anderson",
-//       type: "practicum",
-//       dueDate: "2025-08-10T23:59:00",
-//       dueDateFormatted: "August 10, 2025",
-//       submittedAt: "2025-08-10T18:15:00",
-//       status: "graded",
-//       priority: "high",
-//       points: 100,
-//       grade: 95,
-//       estimatedTime: "15-20 hours",
-//       description: "Complete supervised counseling sessions and submit reflective analysis of biblical counseling principles applied.",
-//       instructions: "Conduct 5 practice counseling sessions with assigned partners. Submit session notes, biblical integration reports, and personal reflection essay.",
-//       attachments: ["practicum-handbook.pdf", "reflection-prompts.pdf"],
-//       submittedDateFormatted: "August 10, 2025",
-//       feedback: "Outstanding application of biblical principles in counseling contexts. Thoughtful reflection and excellent pastoral sensitivity demonstrated."
-//     }
-//   ]
-
-//   // Overdue assignments (simulated for demo)
-//   const overdueAssignments: OverdueAssignment[] = [
-//     {
-//       id: 7,
-//       title: "Greek Translation Assignment #4",
-//       course: "LANG201 - Biblical Greek II",
-//       instructor: "Prof. Timothy Clark",
-//       type: "translation",
-//       dueDate: "August 20, 2025",
-//       points: 75,
-//       daysOverdue: 4,
-//       priority: "high"
-//     }
-//   ]
-
-//   const getStatusColor = (status: string): string => {
-//     switch (status) {
-//       case "pending":
-//         return "bg-amber-100 text-amber-800 border-amber-200"
-//       case "submitted":
-//         return "bg-blue-100 text-blue-800 border-blue-200"
-//       case "graded":
-//         return "bg-emerald-100 text-emerald-800 border-emerald-200"
-//       case "overdue":
-//         return "bg-red-100 text-red-800 border-red-200"
-//       default:
-//         return "bg-gray-100 text-gray-800 border-gray-200"
-//     }
-//   }
-
-//   const getTypeIcon = (type: string) => {
-//     switch (type) {
-//       case "exegesis":
-//         return <BookOpen className="h-4 w-4" />
-//       case "essay":
-//         return <FileText className="h-4 w-4" />
-//       case "exam":
-//         return <GraduationCap className="h-4 w-4" />
-//       case "project":
-//         return <CheckCircle className="h-4 w-4" />
-//       case "practicum":
-//         return <Users className="h-4 w-4" />
-//       case "translation":
-//         return <BookOpen className="h-4 w-4" />
-//       default:
-//         return <FileText className="h-4 w-4" />
-//     }
-//   }
-
-//   const getPriorityColor = (priority: string): string => {
-//     switch (priority) {
-//       case "high":
-//         return "text-red-600"
-//       case "medium":
-//         return "text-amber-600"
-//       case "low":
-//         return "text-green-600"
-//       default:
-//         return "text-gray-600"
-//     }
-//   }
-
-//   const isOverdue = (dueDate: string): boolean => {
-//     return new Date(dueDate) < new Date()
-//   }
-
-//   const pendingAssignments = assignments.filter((a) => a.status === "pending")
-//   const submittedAssignments = assignments.filter((a) => a.status === "submitted")
-//   const gradedAssignments = assignments.filter((a) => a.status === "graded")
-
-//   // Calculate stats
-//   const totalAssignments = assignments.length + overdueAssignments.length
-//   const avgGrade = gradedAssignments.length > 0 
-//     ? Math.round(gradedAssignments.reduce((sum, a) => sum + ((a.grade || 0) / a.points) * 100, 0) / gradedAssignments.length)
-//     : 0
-
-//   return (
-//     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
-//       <div className="max-w-7xl mx-auto space-y-8">
-        
-//         {/* Header Section */}
-//         <div className="text-center space-y-4">
-//           <h1 className="text-4xl font-bold text-slate-800 font-serif">Assignment Center</h1>
-//           <p className="text-slate-600 text-lg">Track your academic progress and manage assignments</p>
-//         </div>
-
-//         {/* Stats Dashboard */}
-//         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-//           <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 shadow-lg">
-//             <CardContent className="p-6">
-//               <div className="flex items-center justify-between">
-//                 <div>
-//                   <p className="text-sm font-medium text-red-700">Overdue</p>
-//                   <p className="text-3xl font-bold text-red-800">{overdueAssignments.length}</p>
-//                 </div>
-//                 <AlertCircle className="h-8 w-8 text-red-600" />
-//               </div>
-//             </CardContent>
-//           </Card>
-
-//           <Card className="bg-gradient-to-br from-amber-50 to-amber-100 shadow-lg">
-//             <CardContent className="p-6">
-//               <div className="flex items-center justify-between">
-//                 <div>
-//                   <p className="text-sm font-medium text-amber-700">Pending</p>
-//                   <p className="text-3xl font-bold text-amber-800">{pendingAssignments.length}</p>
-//                 </div>
-//                 <Clock className="h-8 w-8 text-amber-600" />
-//               </div>
-//             </CardContent>
-//           </Card>
-
-//           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg">
-//             <CardContent className="p-6">
-//               <div className="flex items-center justify-between">
-//                 <div>
-//                   <p className="text-sm font-medium text-blue-700">Submitted</p>
-//                   <p className="text-3xl font-bold text-blue-800">{submittedAssignments.length}</p>
-//                 </div>
-//                 <Upload className="h-8 w-8 text-blue-600" />
-//               </div>
-//             </CardContent>
-//           </Card>
-
-//           <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200 shadow-lg">
-//             <CardContent className="p-6">
-//               <div className="flex items-center justify-between">
-//                 <div>
-//                   <p className="text-sm font-medium text-emerald-700">Graded</p>
-//                   <p className="text-3xl font-bold text-emerald-800">{gradedAssignments.length}</p>
-//                 </div>
-//                 <CheckCircle className="h-8 w-8 text-emerald-600" />
-//               </div>
-//             </CardContent>
-//           </Card>
-
-//           <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 shadow-lg">
-//             <CardContent className="p-6">
-//               <div className="flex items-center justify-between">
-//                 <div>
-//                   <p className="text-sm font-medium text-purple-700">Avg Grade</p>
-//                   <p className="text-3xl font-bold text-purple-800">{avgGrade}%</p>
-//                 </div>
-//                 <Star className="h-8 w-8 text-purple-600" />
-//               </div>
-//             </CardContent>
-//           </Card>
-//         </div>
-
-//         {/* Assignment Tabs */}
-//         <Tabs defaultValue="overdue" className="w-full">
-//           <TabsList className="grid w-full grid-cols-4 bg-white shadow-sm border">
-//             <TabsTrigger value="overdue" className="data-[state=active]:bg-red-50 data-[state=active]:text-red-700">
-//               Overdue ({overdueAssignments.length})
-//             </TabsTrigger>
-//             <TabsTrigger value="pending" className="data-[state=active]:bg-amber-50 data-[state=active]:text-amber-700">
-//               Pending ({pendingAssignments.length})
-//             </TabsTrigger>
-//             <TabsTrigger value="submitted" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">
-//               Submitted ({submittedAssignments.length})
-//             </TabsTrigger>
-//             <TabsTrigger value="graded" className="data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700">
-//               Graded ({gradedAssignments.length})
-//             </TabsTrigger>
-//           </TabsList>
-
-//           {/* Overdue Tab */}
-//           <TabsContent value="overdue" className="space-y-6 mt-6">
-//             {overdueAssignments.map((assignment) => (
-//               <Card key={assignment.id} className="border-red-300 bg-red-50/50 shadow-lg">
-//                 <CardHeader>
-//                   <div className="flex items-start justify-between">
-//                     <div className="flex-1">
-//                       <CardTitle className="font-serif text-lg text-red-800 flex items-center">
-//                         {getTypeIcon(assignment.type)}
-//                         <span className="ml-2">{assignment.title}</span>
-//                       </CardTitle>
-//                       <p className="text-sm text-red-700 mt-1">{assignment.course} • {assignment.instructor}</p>
-//                     </div>
-//                     <div className="flex items-center space-x-2">
-//                       <Badge variant="destructive">{assignment.daysOverdue} days overdue</Badge>
-//                       <Badge variant="outline" className="bg-white">{assignment.points} pts</Badge>
-//                     </div>
-//                   </div>
-//                 </CardHeader>
-//                 <CardContent className="space-y-4">
-//                   <div className="bg-red-100 p-4 rounded-lg border border-red-200">
-//                     <p className="text-sm text-red-800">
-//                       This assignment was due on {assignment.dueDate}. Late submissions may receive reduced points.
-//                     </p>
-//                   </div>
-                  
-//                   <div className="flex items-center justify-between pt-4 border-t border-red-200">
-//                     <div className="text-sm text-red-700">Due Date: {assignment.dueDate}</div>
-//                     <div className="flex items-center space-x-2">
-//                       <Button variant="outline" size="sm" className="border-red-300 text-red-700 hover:bg-red-50">
-//                         Contact Instructor
-//                       </Button>
-//                       <Button size="sm" className="bg-red-600 hover:bg-red-700">
-//                         <Upload className="h-4 w-4 mr-2" />
-//                         Submit Late
-//                       </Button>
-//                     </div>
-//                   </div>
-//                 </CardContent>
-//               </Card>
-//             ))}
-//           </TabsContent>
-
-//           {/* Pending Tab */}
-//           <TabsContent value="pending" className="space-y-6 mt-6">
-//             {pendingAssignments.map((assignment) => (
-//               <Card key={assignment.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-l-amber-400">
-//                 <CardHeader>
-//                   <div className="flex items-start justify-between">
-//                     <div className="flex-1">
-//                       <CardTitle className="font-serif text-lg flex items-center text-slate-800">
-//                         {getTypeIcon(assignment.type)}
-//                         <span className="ml-2">{assignment.title}</span>
-//                         {assignment.priority === "high" && (
-//                           <Star className="h-4 w-4 ml-2 text-red-500 fill-current" />
-//                         )}
-//                       </CardTitle>
-//                       <p className="text-sm text-slate-600 mt-1">{assignment.course} • {assignment.instructor}</p>
-//                     </div>
-//                     <div className="flex items-center space-x-2">
-//                       <Badge className={`${getPriorityColor(assignment.priority)} bg-white border`}>
-//                         {assignment.priority} priority
-//                       </Badge>
-//                       <Badge className="bg-slate-100 text-slate-700">{assignment.points} pts</Badge>
-//                     </div>
-//                   </div>
-//                 </CardHeader>
-//                 <CardContent className="space-y-4">
-//                   <p className="text-slate-700">{assignment.description}</p>
-                  
-//                   <div className="bg-slate-50 p-4 rounded-lg border">
-//                     <h4 className="font-semibold text-slate-800 mb-2">Instructions:</h4>
-//                     <p className="text-sm text-slate-700">{assignment.instructions}</p>
-//                   </div>
-
-//                   <div className="flex items-center space-x-6 text-sm text-slate-600">
-//                     <div className="flex items-center">
-//                       <Calendar className="h-4 w-4 mr-2" />
-//                       Due: {assignment.dueDateFormatted}
-//                     </div>
-//                     <div className="flex items-center">
-//                       <Clock className="h-4 w-4 mr-2" />
-//                       Est. Time: {assignment.estimatedTime}
-//                     </div>
-//                     <div className="text-amber-600 font-medium">
-//                       {assignment.daysRemaining} days remaining
-//                     </div>
-//                   </div>
-
-//                   <div className="flex items-center justify-between pt-4 border-t">
-//                     <div className="text-sm text-slate-600">
-//                       {assignment.attachments.length > 0 && (
-//                         <span>{assignment.attachments.length} attachment(s) available</span>
-//                       )}
-//                     </div>
-//                     <div className="space-x-2">
-//                       <Button variant="outline" size="sm">
-//                         View Details
-//                       </Button>
-//                       <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white">
-//                         Start Assignment
-//                       </Button>
-//                     </div>
-//                   </div>
-//                 </CardContent>
-//               </Card>
-//             ))}
-//           </TabsContent>
-
-//           {/* Submitted Tab */}
-//           <TabsContent value="submitted" className="space-y-6 mt-6">
-//             {submittedAssignments.map((assignment) => (
-//               <Card key={assignment.id} className="shadow-lg border-l-4 border-l-blue-400">
-//                 <CardHeader>
-//                   <div className="flex items-start justify-between">
-//                     <div className="flex-1">
-//                       <CardTitle className="font-serif text-lg flex items-center text-slate-800">
-//                         {getTypeIcon(assignment.type)}
-//                         <span className="ml-2">{assignment.title}</span>
-//                       </CardTitle>
-//                       <p className="text-sm text-slate-600 mt-1">{assignment.course} • {assignment.instructor}</p>
-//                     </div>
-//                     <Badge className="bg-blue-100 text-blue-800 border-blue-200">submitted</Badge>
-//                   </div>
-//                 </CardHeader>
-//                 <CardContent className="space-y-4">
-//                   <p className="text-slate-700">{assignment.description}</p>
-
-//                   <div className="flex items-center space-x-4 text-sm text-slate-600">
-//                     <div className="flex items-center">
-//                       <Calendar className="h-4 w-4 mr-2" />
-//                       Submitted: {assignment.submittedDateFormatted}
-//                     </div>
-//                     <div className="flex items-center">
-//                       <Clock className="h-4 w-4 mr-2" />
-//                       {assignment.points} points
-//                     </div>
-//                   </div>
-
-//                   <div className="flex items-center justify-between pt-4 border-t">
-//                     <div className="text-blue-600 font-medium">Awaiting grade...</div>
-//                     <Button variant="outline" size="sm">
-//                       View Submission
-//                     </Button>
-//                   </div>
-//                 </CardContent>
-//               </Card>
-//             ))}
-//           </TabsContent>
-
-//           {/* Graded Tab */}
-//           <TabsContent value="graded" className="space-y-6 mt-6">
-//             {gradedAssignments.map((assignment) => (
-//               <Card key={assignment.id} className="shadow-lg border-l-4 border-l-emerald-400">
-//                 <CardHeader>
-//                   <div className="flex items-start justify-between">
-//                     <div className="flex-1">
-//                       <CardTitle className="font-serif text-lg flex items-center text-slate-800">
-//                         {getTypeIcon(assignment.type)}
-//                         <span className="ml-2">{assignment.title}</span>
-//                       </CardTitle>
-//                       <p className="text-sm text-slate-600 mt-1">{assignment.course} • {assignment.instructor}</p>
-//                     </div>
-//                     <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200">graded</Badge>
-//                   </div>
-//                 </CardHeader>
-//                 <CardContent className="space-y-4">
-//                   <p className="text-slate-700">{assignment.description}</p>
-
-//                   {assignment.feedback && (
-//                     <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
-//                       <h4 className="font-semibold text-emerald-800 mb-2">Instructor Feedback:</h4>
-//                       <p className="text-sm text-emerald-700">{assignment.feedback}</p>
-//                     </div>
-//                   )}
-
-//                   <div className="flex items-center space-x-4 text-sm text-slate-600">
-//                     <div className="flex items-center">
-//                       <Calendar className="h-4 w-4 mr-2" />
-//                       Submitted: {assignment.submittedDateFormatted}
-//                     </div>
-//                     <div className="flex items-center">
-//                       <Clock className="h-4 w-4 mr-2" />
-//                       {assignment.points} points
-//                     </div>
-//                   </div>
-
-//                   <div className="flex items-center justify-between pt-4 border-t">
-//                     <div className="flex items-center space-x-4">
-//                       <div className="text-2xl font-bold">
-//                         <span className="text-emerald-600">
-//                           {assignment.grade || 0}/{assignment.points}
-//                         </span>
-//                         <span className="text-lg text-slate-600 ml-2">
-//                           ({Math.round(((assignment.grade || 0) / assignment.points) * 100)}%)
-//                         </span>
-//                       </div>
-//                       {Math.round(((assignment.grade || 0) / assignment.points) * 100) >= 90 && (
-//                         <Star className="h-5 w-5 text-yellow-500 fill-current" />
-//                       )}
-//                     </div>
-//                     <div className="space-x-2">
-//                       <Button variant="outline" size="sm">
-//                         View Feedback
-//                       </Button>
-//                       <Button variant="outline" size="sm">
-//                         View Submission
-//                       </Button>
-//                     </div>
-//                   </div>
-//                 </CardContent>
-//               </Card>
-//             ))}
-//           </TabsContent>
-//         </Tabs>
-//       </div>
-//     </div>
-//   )
-// }

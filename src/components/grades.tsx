@@ -9,67 +9,59 @@ export function Grades() {
   const courseGrades = [
     {
       course: "BIBL201",
-      title: "Biblical Hermeneutics",
+      title: "Salvation",
       currentGrade: 88.5,
       letterGrade: "B+",
       credits: 3,
       assignments: [
-        { name: "Essay #1", grade: 92, maxPoints: 100, weight: 25 },
         { name: "Quiz #1", grade: 85, maxPoints: 100, weight: 15 },
-        { name: "Quiz #2", grade: 88, maxPoints: 100, weight: 15 },
-        { name: "Midterm Exam", grade: 87, maxPoints: 100, weight: 30 },
+        { name: "Attendance", grade: 90, maxPoints: 100, weight: 15 },
       ],
     },
     {
       course: "THEO101",
-      title: "Introduction to Systematic Theology",
+      title: "Repentance from dead works",
       currentGrade: 91.2,
       letterGrade: "A-",
       credits: 4,
       assignments: [
-        { name: "Quiz #1", grade: 95, maxPoints: 100, weight: 20 },
-        { name: "Quiz #2", grade: 89, maxPoints: 100, weight: 20 },
-        { name: "Research Paper", grade: 93, maxPoints: 100, weight: 35 },
-        { name: "Class Participation", grade: 88, maxPoints: 100, weight: 25 },
+        { name: "Quiz #1", grade: 85, maxPoints: 100, weight: 15 },
+        { name: "Attendance", grade: 90, maxPoints: 100, weight: 15 },
+        { name: "Presentation", grade: 88, maxPoints: 100, weight: 25 },
       ],
     },
     {
       course: "HIST201",
-      title: "Church History",
+      title: "Baptisms",
       currentGrade: 94.3,
       letterGrade: "A",
       credits: 3,
       assignments: [
-        { name: "Timeline Project", grade: 92, maxPoints: 100, weight: 30 },
-        { name: "Essay #1", grade: 96, maxPoints: 100, weight: 25 },
-        { name: "Quiz #1", grade: 94, maxPoints: 100, weight: 15 },
-        { name: "Quiz #2", grade: 95, maxPoints: 100, weight: 15 },
-        { name: "Presentation", grade: 94, maxPoints: 100, weight: 15 },
+        { name: "Quiz #1", grade: 85, maxPoints: 100, weight: 15 },
+        { name: "Attendance", grade: 90, maxPoints: 100, weight: 15 },
+        { name: "Presentation", grade: 88, maxPoints: 100, weight: 25 },
       ],
     },
     {
       course: "PRAC201",
-      title: "Pastoral Care and Counseling",
+      title: "Stewardship",
       currentGrade: 86.7,
       letterGrade: "B+",
       credits: 3,
       assignments: [
-        { name: "Case Study #1", grade: 89, maxPoints: 100, weight: 30 },
-        { name: "Reflection Paper", grade: 85, maxPoints: 100, weight: 25 },
-        { name: "Role Play Exercise", grade: 87, maxPoints: 100, weight: 20 },
-        { name: "Quiz #1", grade: 86, maxPoints: 100, weight: 25 },
+        { name: "Quiz #1", grade: 85, maxPoints: 100, weight: 15 },
+        { name: "Attendance", grade: 90, maxPoints: 100, weight: 15 },
       ],
     },
     {
       course: "THEO201",
-      title: "Advanced Systematic Theology",
+      title: "End of times",
       currentGrade: 89.1,
       letterGrade: "B+",
       credits: 4,
       assignments: [
-        { name: "Comprehensive Exam", grade: 87, maxPoints: 150, weight: 40 },
-        { name: "Research Project", grade: 91, maxPoints: 100, weight: 35 },
-        { name: "Discussion Posts", grade: 90, maxPoints: 100, weight: 25 },
+       { name: "Quiz #1", grade: 85, maxPoints: 100, weight: 15 },
+        { name: "Attendance", grade: 90, maxPoints: 100, weight: 15 },
       ],
     },
   ]
@@ -187,7 +179,6 @@ export function Grades() {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="courses">Course Grades</TabsTrigger>
           <TabsTrigger value="progress">Progress Tracking</TabsTrigger>
-          <TabsTrigger value="analytics">Grade Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="courses" className="space-y-4">
@@ -313,53 +304,7 @@ export function Grades() {
           </div>
         </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-serif">Grade Distribution</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={gradeDistribution}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="grade" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="count" fill="#dc2626" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-green-600">8</p>
-                  <p className="text-sm text-gray-600">A Grades</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-blue-600">11</p>
-                  <p className="text-sm text-gray-600">B Grades</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-yellow-600">1</p>
-                  <p className="text-sm text-gray-600">C Grades</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
       </Tabs>
     </div>
   )

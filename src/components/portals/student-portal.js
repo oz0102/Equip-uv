@@ -4,12 +4,12 @@ import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { Dashboard } from "@/components/dashboard";
 import Courses from "@/components/courses";
-import Assignments from "@/components/tasks";
 import { Grades } from "@/components/grades";
 import { Attendance } from "@/components/attendance";
 import { Tracker } from "@/components/tracker";
 import { Calendar } from "@/components/calendar";
 import { Profile } from "@/components/profile";
+import TasksCenter from "@/components/tasks";
 export function StudentPortal() {
     const [currentPage, setCurrentPage] = useState("dashboard");
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -19,8 +19,8 @@ export function StudentPortal() {
                 return _jsx(Dashboard, {});
             case "courses":
                 return _jsx(Courses, {});
-            case "assignments":
-                return _jsx(Assignments, {});
+            case "tasks":
+                return _jsx(TasksCenter, {});
             case "grades":
                 return _jsx(Grades, {});
             case "attendance":
