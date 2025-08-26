@@ -26,8 +26,8 @@ export function Dashboard() {
     <div className="space-y-6">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-red-600 to-red-700 rounded-lg p-6 text-white">
-        <h1 className="font-serif text-3xl font-bold mb-2">Welcome back, John!</h1>
-        <p className="text-red-100 text-lg">Ready to continue your journey in biblical education?</p>
+        <h1 className="font-serif text-3xl font-bold mb-2">Welcome back, Gracee!</h1>
+        <p className="text-red-100 text-lg">Ready to continue your journey in Foundations?</p>
       </div>
 
       {/* Stats Cards */}

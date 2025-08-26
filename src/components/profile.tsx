@@ -10,18 +10,18 @@ import { useState } from "react"
 export function Profile() {
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
-    firstName: "John",
-    lastName: "Smith",
-    email: "john.smith@student.equip.academy",
-    phone: "(555) 123-4567",
-    address: "123 Seminary Lane, Bible City, BC 12345",
-    bio: "Passionate about biblical studies and ministry preparation. Currently pursuing foundational training in theology and pastoral care.",
+    firstName: "Grace",
+    lastName: "Festus",
+    email: "EsoheF@student.equip.academy",
+    phone: "+234 123 4567",
+    address: "Opet",
+    bio: "Passionate about biblical studies and ministry preparation. Currently pursuing foundational training in equip academy.",
   })
 
   const studentInfo = {
     studentId: "EQ2024001",
     program: "Foundations Program",
-    cohort: "Foundations 2024 Spring",
+    cohort: "Foundations Cohort 3 Q1",
     enrollmentDate: "2024-01-08",
     expectedGraduation: "2024-12-15",
     status: "Active",

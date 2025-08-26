@@ -7,6 +7,7 @@ const navigation = [
     { name: "Tasks", icon: ClipboardList, key: "tasks" },
     { name: "Grades", icon: GraduationCap, key: "grades" },
     { name: "Attendance", icon: Calendar, key: "attendance" },
+    { name: "Tracker", icon: Calendar, key: "tracker" },
     { name: "Calendar", icon: Calendar, key: "calendar" },
     { name: "Profile", icon: User, key: "profile" },
 ];

@@ -2,16 +2,15 @@ import { useState } from "react"
 import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/header"
 import { Dashboard } from "@/components/dashboard"
-// import { Courses } from "@/components/courses"
-// import { Assignments } from "@/components/assignments"
 import  Courses  from "@/components/courses"
 import Assignments from "@/components/tasks"
 import { Grades } from "@/components/grades"
 import { Attendance } from "@/components/attendance"
+import { Tracker } from "@/components/tracker"
 import { Calendar } from "@/components/calendar"
 import { Profile } from "@/components/profile"
 
-type Page = "dashboard" | "courses" | "assignments" | "grades" | "attendance" | "calendar" | "profile"
+type Page = "dashboard" | "courses" | "assignments" | "grades" | "attendance" | "tracker" | "calendar" | "profile"
 
 export function StudentPortal() {
   const [currentPage, setCurrentPage] = useState<Page>("dashboard")
@@ -29,6 +28,8 @@ export function StudentPortal() {
         return <Grades />
       case "attendance":
         return <Attendance />
+      case "tracker":
+        return <Tracker />
       case "calendar":
         return <Calendar />
       case "profile":

@@ -3,12 +3,11 @@ import { useState } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { Dashboard } from "@/components/dashboard";
-// import { Courses } from "@/components/courses"
-// import { Assignments } from "@/components/assignments"
 import Courses from "@/components/courses";
 import Assignments from "@/components/tasks";
 import { Grades } from "@/components/grades";
 import { Attendance } from "@/components/attendance";
+import { Tracker } from "@/components/tracker";
 import { Calendar } from "@/components/calendar";
 import { Profile } from "@/components/profile";
 export function StudentPortal() {
@@ -26,6 +25,8 @@ export function StudentPortal() {
                 return _jsx(Grades, {});
             case "attendance":
                 return _jsx(Attendance, {});
+            case "tracker":
+                return _jsx(Tracker, {});
             case "calendar":
                 return _jsx(Calendar, {});
             case "profile":

@@ -168,30 +168,6 @@ export function Attendance() {
         </Card>
       </div>
 
-      {/* Course Breakdown */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-serif text-xl">Course Subtopics Overview</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {["Origin of Sin", "Difference Between Sin and Dead Works", "Repentance from Dead Works", "Faith Towards God"].map((subtopic) => {
-              const subtopicRecords = attendanceRecords.filter(record => record.course.includes(subtopic))
-              const presentInSubtopic = subtopicRecords.filter(record => record.status === "present").length
-              const totalInSubtopic = subtopicRecords.length
-              const subtopicRate = totalInSubtopic > 0 ? Math.round((presentInSubtopic / totalInSubtopic) * 100) : 0
-
-              return (
-                <div key={subtopic} className="text-center p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-medium text-sm mb-2">{subtopic}</h4>
-                  <p className="text-2xl font-bold text-green-600">{subtopicRate}%</p>
-                  <p className="text-xs text-gray-600">{presentInSubtopic}/{totalInSubtopic} classes</p>
-                </div>
-              )
-            })}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Attendance Records */}
       <Card>
