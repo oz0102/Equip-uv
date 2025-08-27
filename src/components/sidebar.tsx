@@ -1,5 +1,6 @@
-import { BookOpen, Calendar, ClipboardList, GraduationCap, Home, User, X } from "lucide-react"
+import { BookOpen, Calendar, ClipboardList, GraduationCap, Home, User, X, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/components/auth/auth-context"
 
 interface SidebarProps {
   currentPage: string
@@ -20,6 +21,13 @@ const navigation = [
 ]
 
 export function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen }: SidebarProps) {
+  const { logout, user } = useAuth()
+
+  const handleLogout = () => {
+    logout()
+    setIsOpen(false) // Close sidebar on mobile after logout
+  }
+
   return (
     <>
       {/* Mobile overlay */}
@@ -31,7 +39,7 @@ export function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen }: Side
       <div
         className={`
         fixed inset-y-0 left-0 z-50 w-64 bg-black text-white transform transition-transform duration-300 ease-in-out
-        lg:translate-x-0 lg:static lg:inset-0
+        lg:translate-x-0 lg:static lg:inset-0 flex flex-col
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
       `}
       >
@@ -52,7 +60,7 @@ export function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen }: Side
           </Button>
         </div>
 
-        <nav className="mt-8 px-4">
+        <nav className="flex-1 mt-8 px-4">
           <div className="space-y-2">
             {navigation.map((item) => {
               const Icon = item.icon
@@ -78,15 +86,31 @@ export function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen }: Side
           </div>
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-800">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-              <span className="text-black font-semibold text-sm">OSF</span>
+        {/* User Profile Section */}
+        <div className="border-t border-gray-800">
+          <div className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                <span className="text-black font-semibold text-sm">
+                  {user?.name?.split(' ').map(n => n[0]).join('') || 'OSF'}
+                </span>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium">{user?.name || 'Osazee Samson'}</p>
+                <p className="text-xs text-gray-400">Student ID: EQ2025001</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium">Osazee Samson</p>
-              <p className="text-xs text-gray-400">Student ID: EQ2025001</p>
-            </div>
+          </div>
+          
+          {/* Logout Button */}
+          <div className="px-4 pb-4">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors text-gray-300 hover:bg-red-600 hover:text-white"
+            >
+              <LogOut className="mr-3 h-5 w-5" />
+              Logout
+            </button>
           </div>
         </div>
       </div>

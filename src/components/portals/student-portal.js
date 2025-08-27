@@ -7,7 +7,7 @@ import Courses from "@/components/courses";
 import { Grades } from "@/components/grades";
 import { Attendance } from "@/components/attendance";
 import { Tracker } from "@/components/tracker";
-import { Calendar } from "@/components/calendar";
+import { Notifications } from "@/components/Events";
 import { Profile } from "@/components/profile";
 import TasksCenter from "@/components/tasks";
 export function StudentPortal() {
@@ -27,8 +27,8 @@ export function StudentPortal() {
                 return _jsx(Attendance, {});
             case "tracker":
                 return _jsx(Tracker, {});
-            case "calendar":
-                return _jsx(Calendar, {});
+            case "events":
+                return _jsx(Notifications, {});
             case "profile":
                 return _jsx(Profile, {});
             default:

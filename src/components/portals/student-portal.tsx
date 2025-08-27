@@ -7,11 +7,11 @@ import Assignments from "@/components/tasks"
 import { Grades } from "@/components/grades"
 import { Attendance } from "@/components/attendance"
 import { Tracker } from "@/components/tracker"
-import { Calendar } from "@/components/calendar"
+import { Notifications } from "@/components/Events"
 import { Profile } from "@/components/profile"
 import TasksCenter from "@/components/tasks"
 
-type Page = "dashboard" | "courses" | "tasks" | "grades" | "attendance" | "tracker" | "calendar" | "profile"
+type Page = "dashboard" | "courses" | "tasks" | "grades" | "attendance" | "tracker" | "events" | "profile"
 
 export function StudentPortal() {
   const [currentPage, setCurrentPage] = useState<Page>("dashboard")
@@ -31,8 +31,8 @@ export function StudentPortal() {
         return <Attendance />
       case "tracker":
         return <Tracker />
-      case "calendar":
-        return <Calendar />
+      case "events":
+        return <Notifications />
       case "profile":
         return <Profile />
       default:
