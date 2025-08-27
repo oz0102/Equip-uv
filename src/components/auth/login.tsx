@@ -21,11 +21,11 @@ const DEMO_CREDENTIALS = {
     password: "student123",
     userData: {
       id: "1",
-      name: "Sarah Johnson",
+      name: "Osazee Samson",
       role: "student",
       studentId: "EQ2024001",
       program: "foundations",
-      cohort: "Foundations 2024 Spring",
+      cohort: "Foundations 2026 Q1",
     },
   },
   admin: {
@@ -33,7 +33,7 @@ const DEMO_CREDENTIALS = {
     password: "admin123",
     userData: {
       id: "2",
-      name: "Dr. Michael Thompson",
+      name: "Osazee Samson Festus",
       role: "admin",
       department: "Administration",
     },
@@ -43,7 +43,7 @@ const DEMO_CREDENTIALS = {
     password: "instructor123",
     userData: {
       id: "3",
-      name: "Prof. David Wilson",
+      name: "Osazee Samson Festus",
       role: "instructor",
       instructorId: "INS001",
       department: "Biblical Studies",

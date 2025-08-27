@@ -16,7 +16,7 @@ const navigation = [
   { name: "Grades", icon: GraduationCap, key: "grades" },
   { name: "Attendance", icon: Calendar, key: "attendance" },
   { name: "Tracker", icon: Calendar, key: "tracker" },
-  { name: "Calendar", icon: Calendar, key: "calendar" },
+  { name: "Events", icon: Calendar, key: "events" },
   { name: "Profile", icon: User, key: "profile" },
 ]
 

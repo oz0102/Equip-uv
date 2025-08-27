@@ -14,7 +14,7 @@ const pageNames = {
   assignments: "Assignments",
   grades: "Grades",
   attendance: "Attendance",
-  calendar: "Calendar",
+  events: "Events",
   profile: "Profile",
 }
 
