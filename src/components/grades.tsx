@@ -119,61 +119,61 @@ export function Grades() {
 
   return (
     <div className="space-y-6">
-      {/* GPA Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Current GPA</p>
-                <p className="text-3xl font-bold text-green-600">{calculateGPA()}</p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Credits Earned</p>
-                <p className="text-3xl font-bold text-blue-600">
-                  {courseGrades.reduce((sum, course) => sum + course.credits, 0)}
-                </p>
-              </div>
-              <Award className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Avg Grade</p>
-                <p className="text-3xl font-bold text-purple-600">
-                  {Math.round(courseGrades.reduce((sum, course) => sum + course.currentGrade, 0) / courseGrades.length)}
-                  %
-                </p>
-              </div>
-              <Target className="h-8 w-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Courses</p>
-                <p className="text-3xl font-bold text-red-600">{courseGrades.length}</p>
-              </div>
-              <BookOpen className="h-8 w-8 text-red-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          {/* GPA Overview */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <Card>
+              <CardContent className="p-4 md:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Current GPA</p>
+                    <p className="text-2xl md:text-3xl font-bold text-green-600">{calculateGPA()}</p>
+                  </div>
+                  <TrendingUp className="h-6 w-6 md:h-8 md:w-8 text-green-600" />
+                </div>
+              </CardContent>
+            </Card>
+    
+            <Card>
+              <CardContent className="p-4 md:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Credits Earned</p>
+                    <p className="text-2xl md:text-3xl font-bold text-blue-600">
+                      {courseGrades.reduce((sum, course) => sum + course.credits, 0)}
+                    </p>
+                  </div>
+                  <Award className="h-6 w-6 md:h-8 md:w-8 text-blue-600" />
+                </div>
+              </CardContent>
+            </Card>
+    
+            <Card>
+              <CardContent className="p-4 md:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Avg Grade</p>
+                    <p className="text-2xl md:text-3xl font-bold text-purple-600">
+                      {Math.round(courseGrades.reduce((sum, course) => sum + course.currentGrade, 0) / courseGrades.length)}
+                      %
+                    </p>
+                  </div>
+                  <Target className="h-6 w-6 md:h-8 md:w-8 text-purple-600" />
+                </div>
+              </CardContent>
+            </Card>
+    
+            <Card>
+              <CardContent className="p-4 md:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Courses</p>
+                    <p className="text-2xl md:text-3xl font-bold text-red-600">{courseGrades.length}</p>
+                  </div>
+                  <BookOpen className="h-6 w-6 md:h-8 md:w-8 text-red-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
       <Tabs defaultValue="courses" className="w-full">
         <TabsList className="grid w-full grid-cols-3">

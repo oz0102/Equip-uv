@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Calendar } from "@/components/ui/calendar"
-import { Calendar as CalendarIcon, Clock, FileText, AlertCircle, CheckCircle, Upload, BookOpen, Users, GraduationCap, ArrowLeft, Play, Download, Send, Filter, CalendarDays, Eye } from "lucide-react"
+import { Calendar as CalendarIcon, Clock, FileText, AlertCircle, CheckCircle, Upload, BookOpen, Users, GraduationCap, ArrowLeft, Play, Download, Send, Filter, CalendarDays, Eye, ChevronLeft, ChevronRight } from "lucide-react"
 import { useState } from "react"
 
 // Type definitions
@@ -34,8 +34,8 @@ interface Task {
   videoThumbnail?: string
   resourceUrl?: string
   resourceType?: string
-  submittedContent?: string // Added for student submissions
-  submittedFiles?: string[] // Added for submitted file attachments
+  submittedContent?: string
+  submittedFiles?: string[]
 }
 
 interface OverdueTask {
@@ -54,12 +54,12 @@ export default function TasksCenter() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [submissionText, setSubmissionText] = useState("")
   
-  // Enhanced date filtering state (similar to tracker.tsx)
+  // Enhanced date filtering state
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const [filterMode, setFilterMode] = useState<"day" | "week">("day")
   const [showCalendar, setShowCalendar] = useState(false)
 
-  // Helper functions for date manipulation (from tracker.tsx)
+  // Helper functions for date manipulation
   const getWeekStart = (date: Date) => {
     const d = new Date(date)
     const day = d.getDay()
@@ -309,19 +309,17 @@ export default function TasksCenter() {
     if (!selectedDate) return taskList
     
     return taskList.filter(task => {
-      if (!task.dueDate) return false // Only filter tasks with due dates
+      if (!task.dueDate) return false
       
       const taskDate = new Date(task.dueDate)
       
       if (filterMode === "day") {
-        // Filter by specific day
         return (
           taskDate.getFullYear() === selectedDate.getFullYear() &&
           taskDate.getMonth() === selectedDate.getMonth() &&
           taskDate.getDate() === selectedDate.getDate()
         )
       } else {
-        // Filter by week
         const weekStart = getWeekStart(selectedDate)
         const weekEnd = getWeekEnd(selectedDate)
         return taskDate >= weekStart && taskDate <= weekEnd
@@ -332,13 +330,13 @@ export default function TasksCenter() {
   // Task Details View
   if (selectedTask) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
-        <div className="max-w-4xl mx-auto space-y-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-6">
+        <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
           {/* Back Button */}
           <Button 
             variant="ghost" 
             onClick={handleBackToList}
-            className="flex items-center text-slate-600 hover:text-slate-800"
+            className="flex items-center text-slate-600 hover:text-slate-800 p-2"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Tasks
@@ -346,40 +344,44 @@ export default function TasksCenter() {
 
           {/* Task Header */}
           <Card className="shadow-lg">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <CardTitle className="font-serif text-2xl flex items-center text-slate-800">
-                    {getTypeIcon(selectedTask.type)}
-                    <span className="ml-3">{selectedTask.title}</span>
-                  </CardTitle>
-                  <p className="text-slate-600 mt-2 text-lg">{selectedTask.course} • {selectedTask.instructor}</p>
+            <CardHeader className="pb-4">
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="font-serif text-xl md:text-2xl flex items-start text-slate-800 leading-tight">
+                      <div className="flex-shrink-0 mt-1">
+                        {getTypeIcon(selectedTask.type)}
+                      </div>
+                      <span className="ml-3 break-words">{selectedTask.title}</span>
+                    </CardTitle>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Badge className={`${getPriorityColor(selectedTask.priority)} bg-white border`}>
+                <p className="text-slate-600 text-base md:text-lg break-words">{selectedTask.course} • {selectedTask.instructor}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge className={`${getPriorityColor(selectedTask.priority)} bg-white border text-xs`}>
                     {selectedTask.priority} priority
                   </Badge>
                   {selectedTask.points && (
-                    <Badge className="bg-slate-100 text-slate-700">{selectedTask.points} pts</Badge>
+                    <Badge className="bg-slate-100 text-slate-700 text-xs">{selectedTask.points} pts</Badge>
                   )}
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <p className="text-slate-700 text-lg leading-relaxed">{selectedTask.description}</p>
+            <CardContent className="space-y-4 md:space-y-6">
+              <p className="text-slate-700 text-base md:text-lg leading-relaxed">{selectedTask.description}</p>
               
               {selectedTask.dueDate && (
-                <div className="flex items-center space-x-6 text-slate-600">
+                <div className="space-y-3 md:space-y-0 md:flex md:items-center md:space-x-6 text-slate-600">
                   <div className="flex items-center">
-                    <CalendarIcon className="h-5 w-5 mr-2" />
-                    Due: {selectedTask.dueDateFormatted}
+                    <CalendarIcon className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="text-sm">Due: {selectedTask.dueDateFormatted}</span>
                   </div>
                   <div className="flex items-center">
-                    <Clock className="h-5 w-5 mr-2" />
-                    Est. Time: {selectedTask.estimatedTime}
+                    <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="text-sm">Est. Time: {selectedTask.estimatedTime}</span>
                   </div>
                   {selectedTask.daysRemaining && (
-                    <div className="text-amber-600 font-medium">
+                    <div className="text-amber-600 font-medium text-sm">
                       {selectedTask.daysRemaining} days remaining
                     </div>
                   )}
@@ -392,7 +394,7 @@ export default function TasksCenter() {
           {selectedTask.taskType === 'video' && (
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center">
+                <CardTitle className="flex items-center text-lg">
                   <Play className="h-5 w-5 mr-2" />
                   Video Content
                 </CardTitle>
@@ -406,9 +408,9 @@ export default function TasksCenter() {
                       className="w-full h-full object-cover rounded-lg"
                     />
                   ) : (
-                    <div className="text-center">
-                      <Play className="h-16 w-16 mx-auto text-slate-400 mb-2" />
-                      <p className="text-slate-600">Video content will load here</p>
+                    <div className="text-center p-4">
+                      <Play className="h-12 w-12 md:h-16 md:w-16 mx-auto text-slate-400 mb-2" />
+                      <p className="text-slate-600 text-sm">Video content will load here</p>
                     </div>
                   )}
                 </div>
@@ -423,7 +425,7 @@ export default function TasksCenter() {
           {selectedTask.taskType === 'resource' && (
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center">
+                <CardTitle className="flex items-center text-lg">
                   <BookOpen className="h-5 w-5 mr-2" />
                   Resource Content
                 </CardTitle>
@@ -432,7 +434,7 @@ export default function TasksCenter() {
                 <div className="bg-slate-50 p-6 rounded-lg border text-center">
                   <FileText className="h-12 w-12 mx-auto text-slate-400 mb-3" />
                   <p className="text-slate-600 mb-4">Reading material available for download</p>
-                  <Button className="bg-green-600 hover:bg-green-700">
+                  <Button className="bg-green-600 hover:bg-green-700 w-full md:w-auto">
                     <Download className="h-4 w-4 mr-2" />
                     Download Resource
                   </Button>
@@ -441,11 +443,11 @@ export default function TasksCenter() {
             </Card>
           )}
 
-          {/* Student Submission Display - NEW SECTION */}
+          {/* Student Submission Display */}
           {selectedTask.status === 'submitted' && selectedTask.submittedContent && (
             <Card className="shadow-lg border-blue-200">
               <CardHeader>
-                <CardTitle className="flex items-center text-blue-800">
+                <CardTitle className="flex items-center text-blue-800 text-lg">
                   <Eye className="h-5 w-5 mr-2" />
                   Student Submission
                 </CardTitle>
@@ -454,28 +456,27 @@ export default function TasksCenter() {
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 max-h-96 overflow-y-auto">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 max-h-80 md:max-h-96 overflow-y-auto">
                   <div className="prose prose-sm max-w-none">
-                    <div className="whitespace-pre-wrap text-slate-700 leading-relaxed">
+                    <div className="whitespace-pre-wrap text-slate-700 leading-relaxed text-sm">
                       {selectedTask.submittedContent}
                     </div>
                   </div>
                 </div>
 
-                {/* Submitted Files */}
                 {selectedTask.submittedFiles && selectedTask.submittedFiles.length > 0 && (
                   <div className="space-y-2">
                     <h4 className="font-medium text-blue-800">Submitted Files:</h4>
                     <div className="space-y-2">
                       {selectedTask.submittedFiles.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-                          <div className="flex items-center">
-                            <FileText className="h-4 w-4 mr-2 text-blue-600" />
-                            <span className="text-blue-700">{file}</span>
+                        <div key={index} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200 gap-2">
+                          <div className="flex items-center min-w-0 flex-1">
+                            <FileText className="h-4 w-4 mr-2 text-blue-600 flex-shrink-0" />
+                            <span className="text-blue-700 text-sm truncate">{file}</span>
                           </div>
-                          <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100">
+                          <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100 flex-shrink-0">
                             <Download className="h-4 w-4 mr-1" />
-                            Download
+                            <span className="hidden sm:inline">Download</span>
                           </Button>
                         </div>
                       ))}
@@ -496,11 +497,11 @@ export default function TasksCenter() {
           {/* Instructions */}
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Instructions</CardTitle>
+              <CardTitle className="text-lg">Instructions</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="bg-slate-50 p-4 rounded-lg border">
-                <p className="text-slate-700 leading-relaxed">{selectedTask.instructions}</p>
+                <p className="text-slate-700 leading-relaxed text-sm md:text-base">{selectedTask.instructions}</p>
               </div>
             </CardContent>
           </Card>
@@ -509,19 +510,19 @@ export default function TasksCenter() {
           {selectedTask.attachments.length > 0 && (
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle>Attachments</CardTitle>
+                <CardTitle className="text-lg">Attachments</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   {selectedTask.attachments.map((attachment, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border">
-                      <div className="flex items-center">
-                        <FileText className="h-4 w-4 mr-2 text-slate-600" />
-                        <span className="text-slate-700">{attachment}</span>
+                    <div key={index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border gap-2">
+                      <div className="flex items-center min-w-0 flex-1">
+                        <FileText className="h-4 w-4 mr-2 text-slate-600 flex-shrink-0" />
+                        <span className="text-slate-700 text-sm truncate">{attachment}</span>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="flex-shrink-0">
                         <Download className="h-4 w-4 mr-1" />
-                        Download
+                        <span className="hidden sm:inline">Download</span>
                       </Button>
                     </div>
                   ))}
@@ -530,11 +531,11 @@ export default function TasksCenter() {
             </Card>
           )}
 
-          {/* Submission Area (only for submission tasks) */}
+          {/* Submission Area */}
           {selectedTask.taskType === 'submission' && selectedTask.status === 'pending' && (
             <Card className="shadow-lg border-blue-200">
               <CardHeader>
-                <CardTitle className="text-blue-800">
+                <CardTitle className="text-blue-800 text-lg">
                   {selectedTask.type === 'standup' ? 'Daily Standup Submission' : 'Task Submission'}
                 </CardTitle>
               </CardHeader>
@@ -545,23 +546,23 @@ export default function TasksCenter() {
                     : "Enter your submission here..."}
                   value={submissionText}
                   onChange={(e) => setSubmissionText(e.target.value)}
-                  rows={8}
-                  className="w-full"
+                  rows={6}
+                  className="w-full resize-none"
                 />
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-sm text-slate-600">
                     {selectedTask.type === 'standup' 
                       ? "This will serve as your daily standup feedback"
                       : "Type your response or paste your content above"}
                   </p>
-                  <div className="space-x-2">
-                    <Button variant="outline" onClick={() => setSubmissionText("")}>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setSubmissionText("")} className="flex-1 sm:flex-none">
                       Clear
                     </Button>
                     <Button 
                       onClick={handleSubmit}
                       disabled={!submissionText.trim()}
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-blue-600 hover:bg-blue-700 flex-1 sm:flex-none"
                     >
                       <Send className="h-4 w-4 mr-2" />
                       Submit
@@ -578,7 +579,7 @@ export default function TasksCenter() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-center">
                   <CheckCircle className="h-6 w-6 text-blue-600 mr-2" />
-                  <span className="text-blue-800 font-medium">
+                  <span className="text-blue-800 font-medium text-center">
                     Task submitted on {selectedTask.submittedDateFormatted}
                   </span>
                 </div>
@@ -590,31 +591,30 @@ export default function TasksCenter() {
           {selectedTask.status === 'graded' && (
             <Card className="shadow-lg border-emerald-200">
               <CardHeader>
-                <CardTitle className="text-emerald-800">Grade & Feedback</CardTitle>
+                <CardTitle className="text-emerald-800 text-lg">Grade & Feedback</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-emerald-600">
+                  <div className="text-3xl md:text-4xl font-bold text-emerald-600">
                     {selectedTask.grade}/{selectedTask.points}
                   </div>
-                  <div className="text-lg text-slate-600">
+                  <div className="text-base md:text-lg text-slate-600">
                     ({Math.round(((selectedTask.grade || 0) / (selectedTask.points || 1)) * 100)}%)
                   </div>
                 </div>
                 {selectedTask.feedback && (
                   <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
                     <h4 className="font-semibold text-emerald-800 mb-2">Instructor Feedback:</h4>
-                    <p className="text-emerald-700">{selectedTask.feedback}</p>
+                    <p className="text-emerald-700 text-sm md:text-base">{selectedTask.feedback}</p>
                   </div>
                 )}
 
-                {/* Display submitted content for graded tasks too */}
                 {selectedTask.submittedContent && (
                   <div className="space-y-3">
                     <h4 className="font-semibold text-emerald-800">Your Submission:</h4>
-                    <div className="bg-gray-50 p-4 rounded-lg border max-h-64 overflow-y-auto">
+                    <div className="bg-gray-50 p-4 rounded-lg border max-h-48 md:max-h-64 overflow-y-auto">
                       <div className="prose prose-sm max-w-none">
-                        <div className="whitespace-pre-wrap text-slate-700 leading-relaxed">
+                        <div className="whitespace-pre-wrap text-slate-700 leading-relaxed text-sm">
                           {selectedTask.submittedContent.length > 500 
                             ? selectedTask.submittedContent.substring(0, 500) + "..."
                             : selectedTask.submittedContent}
@@ -624,9 +624,9 @@ export default function TasksCenter() {
                     {selectedTask.submittedFiles && selectedTask.submittedFiles.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {selectedTask.submittedFiles.map((file, index) => (
-                          <Badge key={index} variant="outline" className="bg-gray-100">
+                          <Badge key={index} variant="outline" className="bg-gray-100 text-xs">
                             <FileText className="h-3 w-3 mr-1" />
-                            {file}
+                            <span className="truncate max-w-[100px]">{file}</span>
                           </Badge>
                         ))}
                       </div>
@@ -643,71 +643,71 @@ export default function TasksCenter() {
 
   // Main Tasks List View
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
         
         {/* Header Section */}
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-slate-800 font-serif">Tasks Center</h1>
-          <p className="text-slate-600 text-lg">Track your academic progress and manage tasks</p>
+        <div className="text-center space-y-2 md:space-y-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-800 font-serif">Tasks Center</h1>
+          <p className="text-slate-600 text-base md:text-lg">Track your academic progress and manage tasks</p>
         </div>
 
         {/* Stats Dashboard */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 shadow-lg">
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-red-700">Overdue</p>
-                  <p className="text-3xl font-bold text-red-800">{overdueTasks.length}</p>
+                  <p className="text-xs md:text-sm font-medium text-red-700">Overdue</p>
+                  <p className="text-2xl md:text-3xl font-bold text-red-800">{overdueTasks.length}</p>
                 </div>
-                <AlertCircle className="h-8 w-8 text-red-600" />
+                <AlertCircle className="h-6 w-6 md:h-8 md:w-8 text-red-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-amber-50 to-amber-100 shadow-lg">
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-amber-700">Pending</p>
-                  <p className="text-3xl font-bold text-amber-800">{pendingTasks.length}</p>
+                  <p className="text-xs md:text-sm font-medium text-amber-700">Pending</p>
+                  <p className="text-2xl md:text-3xl font-bold text-amber-800">{pendingTasks.length}</p>
                 </div>
-                <Clock className="h-8 w-8 text-amber-600" />
+                <Clock className="h-6 w-6 md:h-8 md:w-8 text-amber-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg">
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-700">Submitted</p>
-                  <p className="text-3xl font-bold text-blue-800">{submittedTasks.length}</p>
+                  <p className="text-xs md:text-sm font-medium text-blue-700">Submitted</p>
+                  <p className="text-2xl md:text-3xl font-bold text-blue-800">{submittedTasks.length}</p>
                 </div>
-                <Upload className="h-8 w-8 text-blue-600" />
+                <Upload className="h-6 w-6 md:h-8 md:w-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200 shadow-lg">
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-emerald-700">Completed</p>
-                  <p className="text-3xl font-bold text-emerald-800">{gradedTasks.length}</p>
+                  <p className="text-xs md:text-sm font-medium text-emerald-700">Completed</p>
+                  <p className="text-2xl md:text-3xl font-bold text-emerald-800">{gradedTasks.length}</p>
                 </div>
-                <CheckCircle className="h-8 w-8 text-emerald-600" />
+                <CheckCircle className="h-6 w-6 md:h-8 md:w-8 text-emerald-600" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Enhanced Date Filter Section (similar to tracker.tsx) */}
+        {/* Mobile-Optimized Date Filter Section */}
         <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="font-serif text-lg flex items-center">
+          <CardHeader className="pb-4">
+            <div className="flex flex-col space-y-3 md:flex-row md:items-center md:justify-between md:space-y-0">
+              <CardTitle className="font-serif text-base md:text-lg flex items-center">
                 <CalendarDays className="h-5 w-5 mr-2" />
                 Task Date Filter
               </CardTitle>
@@ -716,163 +716,204 @@ export default function TasksCenter() {
                   variant={filterMode === "day" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setFilterMode("day")}
+                  className="text-xs px-3"
                 >
-                  Daily View
+                  Daily
                 </Button>
                 <Button
                   variant={filterMode === "week" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setFilterMode("week")}
+                  className="text-xs px-3"
                 >
-                  Weekly View
+                  Weekly
                 </Button>
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-1">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium">Selected {filterMode === "day" ? "Date" : "Week"}</h4>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowCalendar(!showCalendar)}
-                    >
-                      <Filter className="h-4 w-4 mr-2" />
-                      {showCalendar ? "Hide" : "Show"} Calendar
-                    </Button>
-                  </div>
-                  
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-sm font-medium text-blue-800">
-                      {getCurrentDisplayDate()}
-                    </p>
-                    {filterMode === "week" && selectedDate && (
-                      <p className="text-xs text-blue-600 mt-1">
-                        {getWeekStart(selectedDate).toLocaleDateString()} - {getWeekEnd(selectedDate).toLocaleDateString()}
-                      </p>
-                    )}
-                  </div>
+          <CardContent className="space-y-4">
+            {/* Mobile-first layout */}
+            <div className="space-y-4">
+              {/* Current Selection Display */}
+              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-sm font-medium text-blue-800 break-words">
+                  {getCurrentDisplayDate()}
+                </p>
+                {filterMode === "week" && selectedDate && (
+                  <p className="text-xs text-blue-600 mt-1">
+                    {getWeekStart(selectedDate).toLocaleDateString()} - {getWeekEnd(selectedDate).toLocaleDateString()}
+                  </p>
+                )}
+              </div>
 
-                  <div className="flex flex-col space-y-2">
+              {/* Mobile Navigation Controls */}
+              <div className="block md:hidden">
+                {filterMode === "week" && (
+                  <div className="flex items-center justify-between gap-2 mb-4">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        const today = new Date()
-                        setSelectedDate(today)
+                        if (selectedDate) {
+                          const prevWeek = new Date(selectedDate)
+                          prevWeek.setDate(selectedDate.getDate() - 7)
+                          setSelectedDate(prevWeek)
+                        }
                       }}
+                      className="flex items-center text-xs px-3"
                     >
-                      Go to Today
+                      <ChevronLeft className="h-4 w-4 mr-1" />
+                      Previous
                     </Button>
-                    
-                    {filterMode === "week" && (
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (selectedDate) {
-                              const prevWeek = new Date(selectedDate)
-                              prevWeek.setDate(selectedDate.getDate() - 7)
-                              setSelectedDate(prevWeek)
-                            }
-                          }}
-                        >
-                          Previous Week
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (selectedDate) {
-                              const nextWeek = new Date(selectedDate)
-                              nextWeek.setDate(selectedDate.getDate() + 7)
-                              setSelectedDate(nextWeek)
-                            }
-                          }}
-                        >
-                          Next Week
-                        </Button>
-                      </div>
-                    )}
-
+                    <span className="text-xs text-slate-600 font-medium">Week Navigation</span>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
-                      onClick={() => setSelectedDate(undefined)}
+                      onClick={() => {
+                        if (selectedDate) {
+                          const nextWeek = new Date(selectedDate)
+                          nextWeek.setDate(selectedDate.getDate() + 7)
+                          setSelectedDate(nextWeek)
+                        }
+                      }}
+                      className="flex items-center text-xs px-3"
                     >
-                      Clear Filter
+                      Next
+                      <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                   </div>
-                </div>
+                )}
               </div>
 
+              {/* Control Buttons */}
+              <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const today = new Date()
+                    setSelectedDate(today)
+                  }}
+                  className="w-full md:w-auto text-xs"
+                >
+                  Go to Today
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCalendar(!showCalendar)}
+                  className="w-full md:w-auto text-xs"
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  {showCalendar ? "Hide" : "Show"} Calendar
+                </Button>
+
+                {/* Desktop Week Navigation */}
+                {filterMode === "week" && (
+                  <div className="hidden md:flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (selectedDate) {
+                          const prevWeek = new Date(selectedDate)
+                          prevWeek.setDate(selectedDate.getDate() - 7)
+                          setSelectedDate(prevWeek)
+                        }
+                      }}
+                      className="text-xs"
+                    >
+                      Previous Week
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (selectedDate) {
+                          const nextWeek = new Date(selectedDate)
+                          nextWeek.setDate(selectedDate.getDate() + 7)
+                          setSelectedDate(nextWeek)
+                        }
+                      }}
+                      className="text-xs"
+                    >
+                      Next Week
+                    </Button>
+                  </div>
+                )}
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedDate(undefined)}
+                  className="w-full md:w-auto text-xs"
+                >
+                  Clear Filter
+                </Button>
+              </div>
+
+              {/* Calendar Display */}
               {showCalendar && (
-                <div className="lg:col-span-2">
+                <div className="mt-4">
                   <Calendar
                     mode="single"
                     selected={selectedDate}
                     onSelect={setSelectedDate}
-                    className="rounded-md border w-full"
+                    className="rounded-md border w-full mx-auto"
                   />
-                </div>
-              )}
-              
-              {!showCalendar && (
-                <div className="lg:col-span-2">
-                  <div className="p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 text-center">
-                    <CalendarDays className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600 mb-2">
-                      {filterMode === "day" 
-                        ? "Filter tasks by specific due date" 
-                        : "Filter tasks by due dates within the selected week"
-                      }
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Click "Show Calendar" to select a different {filterMode === "day" ? "date" : "week"}
-                    </p>
-                  </div>
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Task Tabs */}
+        {/* Mobile-Optimized Task Tabs */}
         <Tabs defaultValue="pending" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-white shadow-sm border">
-            <TabsTrigger value="overdue" className="data-[state=active]:bg-red-50 data-[state=active]:text-red-700">
-              Overdue ({overdueTasks.length})
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-white shadow-sm border h-auto p-1">
+            <TabsTrigger value="overdue" className="data-[state=active]:bg-red-50 data-[state=active]:text-red-700 text-xs p-2 md:p-3">
+              <div className="text-center">
+                <div>Overdue</div>
+                <div className="font-bold">({overdueTasks.length})</div>
+              </div>
             </TabsTrigger>
-            <TabsTrigger value="pending" className="data-[state=active]:bg-amber-50 data-[state=active]:text-amber-700">
-              Pending ({filteredTasks(pendingTasks).length})
+            <TabsTrigger value="pending" className="data-[state=active]:bg-amber-50 data-[state=active]:text-amber-700 text-xs p-2 md:p-3">
+              <div className="text-center">
+                <div>Pending</div>
+                <div className="font-bold">({filteredTasks(pendingTasks).length})</div>
+              </div>
             </TabsTrigger>
-            <TabsTrigger value="submitted" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">
-              Submitted ({filteredTasks(submittedTasks).length})
+            <TabsTrigger value="submitted" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 text-xs p-2 md:p-3">
+              <div className="text-center">
+                <div>Submitted</div>
+                <div className="font-bold">({filteredTasks(submittedTasks).length})</div>
+              </div>
             </TabsTrigger>
-            <TabsTrigger value="completed" className="data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700">
-              Completed ({filteredTasks(gradedTasks).length})
+            <TabsTrigger value="completed" className="data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 text-xs p-2 md:p-3">
+              <div className="text-center">
+                <div>Completed</div>
+                <div className="font-bold">({filteredTasks(gradedTasks).length})</div>
+              </div>
             </TabsTrigger>
           </TabsList>
 
           {/* Overdue Tab */}
-          <TabsContent value="overdue" className="space-y-6 mt-6">
+          <TabsContent value="overdue" className="space-y-4 md:space-y-6 mt-6">
             {overdueTasks.map((task) => (
               <Card key={task.id} className="border-red-300 bg-red-50/50 shadow-lg">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="font-serif text-lg text-red-800">
-                        {task.title}
-                      </CardTitle>
-                      <p className="text-sm text-red-700 mt-1">{task.course} • {task.instructor}</p>
+                <CardHeader className="pb-3">
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="font-serif text-base md:text-lg text-red-800 break-words leading-tight">
+                          {task.title}
+                        </CardTitle>
+                        <p className="text-xs md:text-sm text-red-700 mt-1 break-words">{task.course} • {task.instructor}</p>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant="destructive">{task.daysOverdue} days overdue</Badge>
-                      {task.points && <Badge variant="outline" className="bg-white">{task.points} pts</Badge>}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="destructive" className="text-xs">{task.daysOverdue} days overdue</Badge>
+                      {task.points && <Badge variant="outline" className="bg-white text-xs">{task.points} pts</Badge>}
                     </div>
                   </div>
                 </CardHeader>
@@ -881,11 +922,11 @@ export default function TasksCenter() {
           </TabsContent>
 
           {/* Pending Tab */}
-          <TabsContent value="pending" className="space-y-6 mt-6">
+          <TabsContent value="pending" className="space-y-4 md:space-y-6 mt-6">
             {filteredTasks(pendingTasks).length === 0 ? (
-              <Card className="p-8 text-center">
-                <CalendarDays className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-600 mb-2">No pending tasks found</h3>
+              <Card className="p-6 md:p-8 text-center">
+                <CalendarDays className="h-10 w-10 md:h-12 md:w-12 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-base md:text-lg font-medium text-gray-600 mb-2">No pending tasks found</h3>
                 <p className="text-sm text-gray-500">
                   {selectedDate 
                     ? `No tasks due ${filterMode === "day" ? "on this date" : "in this week"}.`
@@ -900,48 +941,52 @@ export default function TasksCenter() {
                   className="shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-amber-400 cursor-pointer"
                   onClick={() => handleTaskClick(task)}
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="font-serif text-lg flex items-center text-slate-800">
-                          {getTypeIcon(task.type)}
-                          <span className="ml-2">{task.title}</span>
-                          {task.taskType === 'video' && (
-                            <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-700">
-                              Video
-                            </Badge>
-                          )}
-                          {task.taskType === 'resource' && (
-                            <Badge variant="outline" className="ml-2 bg-green-50 text-green-700">
-                              Resource
-                            </Badge>
-                          )}
-                        </CardTitle>
-                        <p className="text-sm text-slate-600 mt-1">{task.course} • {task.instructor}</p>
+                  <CardHeader className="pb-3">
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <CardTitle className="font-serif text-base md:text-lg flex items-start text-slate-800 leading-tight">
+                            <div className="flex-shrink-0 mt-1">
+                              {getTypeIcon(task.type)}
+                            </div>
+                            <span className="ml-2 break-words">{task.title}</span>
+                          </CardTitle>
+                          <p className="text-xs md:text-sm text-slate-600 mt-1 break-words">{task.course} • {task.instructor}</p>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge className={`${getPriorityColor(task.priority)} bg-white border`}>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {task.taskType === 'video' && (
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
+                            Video
+                          </Badge>
+                        )}
+                        {task.taskType === 'resource' && (
+                          <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
+                            Resource
+                          </Badge>
+                        )}
+                        <Badge className={`${getPriorityColor(task.priority)} bg-white border text-xs`}>
                           {task.priority} priority
                         </Badge>
                         {task.points && (
-                          <Badge className="bg-slate-100 text-slate-700">{task.points} pts</Badge>
+                          <Badge className="bg-slate-100 text-slate-700 text-xs">{task.points} pts</Badge>
                         )}
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <p className="text-slate-700">{task.description}</p>
+                    <p className="text-slate-700 text-sm md:text-base leading-relaxed line-clamp-3">{task.description}</p>
                     
-                    <div className="flex items-center space-x-6 text-sm text-slate-600">
+                    <div className="space-y-2 md:flex md:items-center md:space-y-0 md:space-x-6 text-xs md:text-sm text-slate-600">
                       {task.dueDate && (
                         <div className="flex items-center">
-                          <CalendarIcon className="h-4 w-4 mr-2" />
-                          Due: {task.dueDateFormatted}
+                          <CalendarIcon className="h-4 w-4 mr-2 flex-shrink-0" />
+                          <span>Due: {task.dueDateFormatted}</span>
                         </div>
                       )}
                       <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-2" />
-                        {task.estimatedTime}
+                        <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
+                        <span>{task.estimatedTime}</span>
                       </div>
                       {task.daysRemaining && (
                         <div className="text-amber-600 font-medium">
@@ -950,13 +995,13 @@ export default function TasksCenter() {
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t">
-                      <div className="text-sm text-slate-600">
+                    <div className="flex items-center justify-between pt-3 border-t">
+                      <div className="text-xs md:text-sm text-slate-600">
                         {task.attachments.length > 0 && (
                           <span>{task.attachments.length} attachment(s)</span>
                         )}
                       </div>
-                      <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white">
+                      <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3">
                         View Details
                       </Button>
                     </div>
@@ -967,11 +1012,11 @@ export default function TasksCenter() {
           </TabsContent>
 
           {/* Submitted Tab */}
-          <TabsContent value="submitted" className="space-y-6 mt-6">
+          <TabsContent value="submitted" className="space-y-4 md:space-y-6 mt-6">
             {filteredTasks(submittedTasks).length === 0 ? (
-              <Card className="p-8 text-center">
-                <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-600 mb-2">No submitted tasks found</h3>
+              <Card className="p-6 md:p-8 text-center">
+                <Upload className="h-10 w-10 md:h-12 md:w-12 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-base md:text-lg font-medium text-gray-600 mb-2">No submitted tasks found</h3>
                 <p className="text-sm text-gray-500">
                   {selectedDate 
                     ? `No submitted tasks ${filterMode === "day" ? "on this date" : "in this week"}.`
@@ -986,19 +1031,23 @@ export default function TasksCenter() {
                   className="shadow-lg border-l-4 border-l-blue-400 cursor-pointer"
                   onClick={() => handleTaskClick(task)}
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="font-serif text-lg flex items-center text-slate-800">
-                          {getTypeIcon(task.type)}
-                          <span className="ml-2">{task.title}</span>
-                        </CardTitle>
-                        <p className="text-sm text-slate-600 mt-1">{task.course} • {task.instructor}</p>
+                  <CardHeader className="pb-3">
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <CardTitle className="font-serif text-base md:text-lg flex items-start text-slate-800 leading-tight">
+                            <div className="flex-shrink-0 mt-1">
+                              {getTypeIcon(task.type)}
+                            </div>
+                            <span className="ml-2 break-words">{task.title}</span>
+                          </CardTitle>
+                          <p className="text-xs md:text-sm text-slate-600 mt-1 break-words">{task.course} • {task.instructor}</p>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge className="bg-blue-100 text-blue-800 border-blue-200">submitted</Badge>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge className="bg-blue-100 text-blue-800 border-blue-200 text-xs">submitted</Badge>
                         {task.submittedContent && (
-                          <Badge variant="outline" className="bg-green-50 text-green-700">
+                          <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
                             <Eye className="h-3 w-3 mr-1" />
                             Has Content
                           </Badge>
@@ -1007,24 +1056,23 @@ export default function TasksCenter() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <p className="text-slate-700">{task.description}</p>
+                    <p className="text-slate-700 text-sm md:text-base leading-relaxed line-clamp-3">{task.description}</p>
 
-                    <div className="flex items-center space-x-4 text-sm text-slate-600">
+                    <div className="space-y-2 md:flex md:items-center md:space-y-0 md:space-x-4 text-xs md:text-sm text-slate-600">
                       <div className="flex items-center">
-                        <CalendarIcon className="h-4 w-4 mr-2" />
-                        Submitted: {task.submittedDateFormatted}
+                        <CalendarIcon className="h-4 w-4 mr-2 flex-shrink-0" />
+                        <span>Submitted: {task.submittedDateFormatted}</span>
                       </div>
                       <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-2" />
-                        {task.points ? `${task.points} points` : 'No points'}
+                        <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
+                        <span>{task.points ? `${task.points} points` : 'No points'}</span>
                       </div>
                     </div>
 
-                    {/* Show preview of submitted content */}
                     {task.submittedContent && (
                       <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                        <h4 className="text-sm font-medium text-blue-800 mb-2">Submission Preview:</h4>
-                        <p className="text-sm text-blue-700 line-clamp-2">
+                        <h4 className="text-xs md:text-sm font-medium text-blue-800 mb-2">Submission Preview:</h4>
+                        <p className="text-xs md:text-sm text-blue-700 line-clamp-2">
                           {task.submittedContent.length > 120 
                             ? task.submittedContent.substring(0, 120) + "..."
                             : task.submittedContent}
@@ -1032,9 +1080,9 @@ export default function TasksCenter() {
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between pt-4 border-t">
-                      <div className="text-blue-600 font-medium">Awaiting grade...</div>
-                      <Button variant="outline" size="sm">
+                    <div className="flex items-center justify-between pt-3 border-t">
+                      <div className="text-blue-600 font-medium text-xs md:text-sm">Awaiting grade...</div>
+                      <Button variant="outline" size="sm" className="text-xs px-3">
                         View Details
                       </Button>
                     </div>
@@ -1045,11 +1093,11 @@ export default function TasksCenter() {
           </TabsContent>
 
           {/* Completed Tab */}
-          <TabsContent value="completed" className="space-y-6 mt-6">
+          <TabsContent value="completed" className="space-y-4 md:space-y-6 mt-6">
             {filteredTasks(gradedTasks).length === 0 ? (
-              <Card className="p-8 text-center">
-                <CheckCircle className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-600 mb-2">No completed tasks found</h3>
+              <Card className="p-6 md:p-8 text-center">
+                <CheckCircle className="h-10 w-10 md:h-12 md:w-12 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-base md:text-lg font-medium text-gray-600 mb-2">No completed tasks found</h3>
                 <p className="text-sm text-gray-500">
                   {selectedDate 
                     ? `No completed tasks ${filterMode === "day" ? "on this date" : "in this week"}.`
@@ -1064,59 +1112,61 @@ export default function TasksCenter() {
                   className="shadow-lg border-l-4 border-l-emerald-400 cursor-pointer"
                   onClick={() => handleTaskClick(task)}
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="font-serif text-lg flex items-center text-slate-800">
-                          {getTypeIcon(task.type)}
-                          <span className="ml-2">{task.title}</span>
-                        </CardTitle>
-                        <p className="text-sm text-slate-600 mt-1">{task.course} • {task.instructor}</p>
+                  <CardHeader className="pb-3">
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <CardTitle className="font-serif text-base md:text-lg flex items-start text-slate-800 leading-tight">
+                            <div className="flex-shrink-0 mt-1">
+                              {getTypeIcon(task.type)}
+                            </div>
+                            <span className="ml-2 break-words">{task.title}</span>
+                          </CardTitle>
+                          <p className="text-xs md:text-sm text-slate-600 mt-1 break-words">{task.course} • {task.instructor}</p>
+                        </div>
+                        <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 text-xs flex-shrink-0">completed</Badge>
                       </div>
-                      <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200">completed</Badge>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <p className="text-slate-700">{task.description}</p>
+                    <p className="text-slate-700 text-sm md:text-base leading-relaxed line-clamp-3">{task.description}</p>
 
                     {task.feedback && (
-                      <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
-                        <h4 className="font-semibold text-emerald-800 mb-2">Instructor Feedback:</h4>
-                        <p className="text-sm text-emerald-700">{task.feedback}</p>
+                      <div className="bg-emerald-50 p-3 md:p-4 rounded-lg border border-emerald-200">
+                        <h4 className="font-semibold text-emerald-800 mb-2 text-xs md:text-sm">Instructor Feedback:</h4>
+                        <p className="text-xs md:text-sm text-emerald-700 line-clamp-3">{task.feedback}</p>
                       </div>
                     )}
 
-                    <div className="flex items-center space-x-4 text-sm text-slate-600">
+                    <div className="space-y-2 md:flex md:items-center md:space-y-0 md:space-x-4 text-xs md:text-sm text-slate-600">
                       <div className="flex items-center">
-                        <CalendarIcon className="h-4 w-4 mr-2" />
-                        Submitted: {task.submittedDateFormatted}
+                        <CalendarIcon className="h-4 w-4 mr-2 flex-shrink-0" />
+                        <span>Submitted: {task.submittedDateFormatted}</span>
                       </div>
                       <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-2" />
-                        {task.points ? `${task.points} points` : 'No points'}
+                        <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
+                        <span>{task.points ? `${task.points} points` : 'No points'}</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t">
-                      <div className="flex items-center space-x-4">
+                    <div className="flex flex-col space-y-3 md:flex-row md:items-center md:justify-between md:space-y-0 pt-3 border-t">
+                      <div className="flex items-center">
                         {task.grade && task.points ? (
-                          <div className="text-2xl font-bold">
+                          <div className="text-xl md:text-2xl font-bold">
                             <span className="text-emerald-600">
                               {task.grade}/{task.points}
                             </span>
-                            <span className="text-lg text-slate-600 ml-2">
+                            <span className="text-sm md:text-lg text-slate-600 ml-2">
                               ({Math.round((task.grade / task.points) * 100)}%)
                             </span>
                           </div>
                         ) : (
-                          <div className="text-emerald-600 font-medium">Task Completed</div>
+                          <div className="text-emerald-600 font-medium text-sm">Task Completed</div>
                         )}
                       </div>
-                      <div className="space-x-2">
-                        <Button variant="outline" size="sm">
-                          View Details
-                        </Button>
-                      </div>
+                      <Button variant="outline" size="sm" className="text-xs px-3 w-full md:w-auto">
+                        View Details
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -1128,4 +1178,3 @@ export default function TasksCenter() {
     </div>
   )
 }
-

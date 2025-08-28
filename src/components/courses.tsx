@@ -3,12 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { BookOpen, Calendar, Clock, User, CheckCircle, AlertCircle, FileText, Video, Download, Eye } from "lucide-react"
+import { BookOpen, Calendar, Clock, User, CheckCircle, AlertCircle, FileText, Video, Download, Eye, Link } from "lucide-react"
 
+// Define a union type for resource types
+type ResourceType = 'pdf' | 'video' | 'mp3' | 'link' | 'book' | 'document';
+
+// Updated ResourceItem to include a more specific type and optionally a direct content field for syllabi
 type ResourceItem = {
   title: string;
-  type: string;
-  url: string;
+  type?: ResourceType; // Make type optional as syllabus items might not have a file type
+  url?: string; // Make URL optional as syllabus items might be fetched directly
+  content?: string; // For syllabus items that are just text points
 }
 
 type BookItem = {
@@ -35,8 +40,8 @@ type Course = {
   description: string;
   nextClass: string;
   status: 'active' | 'upcoming' | 'completed';
-  syllabi: ResourceItem[];
-  readingResources: ResourceItem[];
+  syllabi: ResourceItem[]; // Syllabi is now a list of ResourceItem, where type/url can be optional
+  readingResources: ResourceItem[]; // Reading resources can now have different file types
   recordings: RecordingItem[];
   attachedBooks: BookItem[];
 }
@@ -70,13 +75,20 @@ export default function CoursesPage() {
       nextClass: "2025-08-28",
       status: "active",
       syllabi: [
-        { title: "Course Syllabus", type: "pdf", url: "#" },
-        { title: "Reading Schedule", type: "pdf", url: "#" }
+        { title: "Introduction to Salvation", content: "Brief overview of salvation concepts." },
+        { title: "Definition of repentance", type: "document", url: "#" }, // This could be a document on the definition
+        { title: "What are dead works?", type:"document", url: "#" },
+        { title: "The role of repentance in salvation", type: "document", url: "#" },
+        { title: "Living a life of continual repentance", type: "document", url: "#" },
+        { title: "Faith and Justification", content: "Understanding faith as a gift from God." },
+        { title: "Eternal Security", content: "Exploring the doctrine of eternal security." }
       ],
       readingResources: [
-        { title: "Systematic Theology by Wayne Grudem", type: "book", url: "#" },
-        { title: "The Gospel According to Jesus", type: "book", url: "#" },
-        { title: "Articles on Salvation", type: "pdf", url: "#" }
+        { title: "Systematic Theology by Wayne Grudem (Chapter 25)", type: "pdf", url: "#" },
+        { title: "The Gospel According to Jesus (Video Series)", type: "video", url: "#" },
+        { title: "Podcast on Repentance", type: "mp3", url: "#" },
+        { title: "Articles on Salvation (External Link)", type: "link", url: "https://example.com/salvation-articles" },
+        { title: "Key Scripture Passages", type: "document", url: "#" }
       ],
       recordings: [
         { title: "Week 1: Introduction to Salvation", date: "2025-08-21", url: "#" },
@@ -99,8 +111,16 @@ export default function CoursesPage() {
       description: "A comprehensive overview of Christian doctrine and theological foundations",
       nextClass: "2025-09-03",
       status: "upcoming",
-      syllabi: [],
-      readingResources: [],
+      syllabi: [
+        { title: "Course Introduction and Methodology", content: "" },
+        { title: "The Doctrine of God", content: "" },
+        { title: "The Doctrine of Christ", content: "" },
+        { title: "The Doctrine of the Holy Spirit", content: "" },
+      ],
+      readingResources: [
+        { title: "Theology for Beginners", type: "book", url: "#" },
+        { title: "Historical Theology Overview", type: "pdf", url: "#" }
+      ],
       recordings: [],
       attachedBooks: []
     },
@@ -116,8 +136,14 @@ export default function CoursesPage() {
       description: "Principles and methods of biblical interpretation",
       nextClass: "2025-07-30",
       status: "completed",
-      syllabi: [],
-      readingResources: [],
+      syllabi: [
+        { title: "Introduction to Hermeneutics", content: "" },
+        { title: "Historical-Grammatical Method", content: "" },
+        { title: "Literary Context", content: "" }
+      ],
+      readingResources: [
+        { title: "How to Read the Bible for All Its Worth", type: "book", url: "#" }
+      ],
       recordings: [],
       attachedBooks: []
     }
@@ -169,6 +195,54 @@ export default function CoursesPage() {
     }
   }
 
+  const getResourceIcon = (type?: ResourceType) => {
+    switch (type) {
+      case 'pdf':
+      case 'document':
+        return <FileText className="h-4 w-4 mr-1 text-red-500" />;
+      case 'video':
+        return <Video className="h-4 w-4 mr-1 text-blue-500" />;
+      case 'mp3':
+        // Using FileText as a placeholder for audio, consider lucide-react Speaker or Headphones if available
+        return <FileText className="h-4 w-4 mr-1 text-orange-500" />;
+      case 'link':
+        return <Link className="h-4 w-4 mr-1 text-purple-500" />;
+      case 'book':
+        return <BookOpen className="h-4 w-4 mr-1 text-green-500" />;
+      default:
+        return <FileText className="h-4 w-4 mr-1 text-gray-500" />; // Default icon for general items
+    }
+  }; // CLOSING BRACE WAS MISSING HERE
+
+  const getActionIcon = (type?: ResourceType) => {
+    switch (type) {
+      case 'video':
+      case 'mp3':
+      case 'link':
+        return <Eye className="h-4 w-4" />; // View icon for playable/viewable content
+      case 'pdf':
+      case 'document':
+      case 'book':
+      default:
+        return <Download className="h-4 w-4" />; // Download icon for file types
+    }
+  }
+
+  const getActionText = (type?: ResourceType) => {
+    switch (type) {
+      case 'video':
+      case 'mp3':
+      case 'link':
+        return "View";
+      case 'pdf':
+      case 'document':
+      case 'book':
+      default:
+        return "Download";
+    }
+  }
+
+
   const isOverdue = (dueDate: string) => {
     return new Date(dueDate) < new Date()
   }
@@ -185,7 +259,7 @@ export default function CoursesPage() {
 
   if (currentView === 'course-detail' && selectedCourse) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 p-4">
         <div className="flex items-center justify-between">
           <Button onClick={backToCourses} variant="outline">
             ← Back to Courses
@@ -197,7 +271,7 @@ export default function CoursesPage() {
             <CardTitle className="font-serif text-2xl text-black">
               {selectedCourse.code}: {selectedCourse.title}
             </CardTitle>
-            <div className="flex items-center gap-4 text-sm text-gray-600">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-600">
               <div className="flex items-center">
                 <User className="h-4 w-4 mr-1" />
                 {selectedCourse.instructor}
@@ -206,7 +280,7 @@ export default function CoursesPage() {
                 <Calendar className="h-4 w-4 mr-1" />
                 {selectedCourse.schedule}
               </div>
-              <Badge variant="outline" className="text-red-600 border-red-600">
+              <Badge variant="outline" className="text-red-600 border-red-600 w-fit">
                 {selectedCourse.credits} Credits
               </Badge>
             </div>
@@ -229,25 +303,36 @@ export default function CoursesPage() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <FileText className="h-5 w-5 mr-2 text-red-600" />
-                Syllabi
+                Syllabus
               </CardTitle>
             </CardHeader>
             <CardContent>
               {selectedCourse.syllabi.length > 0 ? (
                 <div className="space-y-2">
                   {selectedCourse.syllabi.map((item: ResourceItem, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-2 border rounded">
-                      <span className="text-sm">{item.title}</span>
-                      <Button size="sm" variant="outline">
-                        <Download className="h-4 w-4" />
-                      </Button>
+                    <div key={index} className="flex flex-col sm:flex-row sm:items-start justify-between p-2 border rounded gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center">
+                          {item.type && getResourceIcon(item.type)}
+                          <span className="text-sm font-medium truncate">{item.title}</span>
+                        </div>
+                        {item.content && (
+                          <p className="text-xs text-gray-600 ml-5 mt-1">{item.content}</p>
+                        )}
+                      </div>
+                      {item.url && (
+                        <Button size="sm" variant="outline" onClick={() => window.open(item.url, '_blank')} className="flex-shrink-0">
+                          {getActionIcon(item.type)}
+                        </Button>
+                      )}
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-sm">No syllabi available</p>
+                <p className="text-gray-500 text-sm">No syllabus items available</p>
               )}
             </CardContent>
+
           </Card>
 
           {/* Reading Resources */}
@@ -262,10 +347,13 @@ export default function CoursesPage() {
               {selectedCourse.readingResources.length > 0 ? (
                 <div className="space-y-2">
                   {selectedCourse.readingResources.map((item: ResourceItem, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-2 border rounded">
-                      <span className="text-sm">{item.title}</span>
-                      <Button size="sm" variant="outline">
-                        <Eye className="h-4 w-4" />
+                    <div key={index} className="flex items-center justify-between p-2 border rounded gap-2">
+                      <div className="flex items-center min-w-0 flex-1">
+                        {getResourceIcon(item.type)}
+                        <span className="text-sm truncate">{item.title}</span>
+                      </div>
+                      <Button size="sm" variant="outline" onClick={() => window.open(item.url, '_blank')} className="flex-shrink-0">
+                        {getActionIcon(item.type)}
                       </Button>
                     </div>
                   ))}
@@ -289,13 +377,13 @@ export default function CoursesPage() {
                 <div className="space-y-2">
                   {selectedCourse.recordings.map((item: RecordingItem, index: number) => (
                     <div key={index} className="p-2 border rounded">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium">{item.title}</p>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium truncate">{item.title}</p>
                           <p className="text-xs text-gray-500">{new Date(item.date).toLocaleDateString()}</p>
                         </div>
-                        <Button size="sm" variant="outline">
-                          <Video className="h-4 w-4" />
+                        <Button size="sm" variant="outline" onClick={() => window.open(item.url, '_blank')} className="flex-shrink-0">
+                          <Eye className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
@@ -320,12 +408,12 @@ export default function CoursesPage() {
                 <div className="space-y-2">
                   {selectedCourse.attachedBooks.map((item: BookItem, index: number) => (
                     <div key={index} className="p-2 border rounded">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium">{item.title}</p>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium truncate">{item.title}</p>
                           <p className="text-xs text-gray-500">by {item.author}</p>
                         </div>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => window.open(item.url, '_blank')} className="flex-shrink-0">
                           <Download className="h-4 w-4" />
                         </Button>
                       </div>
@@ -343,43 +431,43 @@ export default function CoursesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="space-y-6 p-4">
+      {/* Header Stats - Mobile: 2 columns, Tablet+: 3 columns */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Course</p>
-                <p className="text-2xl font-bold text-black">{activeCourse ? 1 : 0}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">Active Course</p>
+                <p className="text-lg md:text-2xl font-bold text-black">{activeCourse ? 1 : 0}</p>
               </div>
-              <BookOpen className="h-8 w-8 text-red-600" />
+              <BookOpen className="h-6 w-6 md:h-8 md:w-8 text-red-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Pending Tasks</p>
-                <p className="text-2xl font-bold text-black">
+                <p className="text-xs md:text-sm font-medium text-gray-600">Pending Tasks</p>
+                <p className="text-lg md:text-2xl font-bold text-black">
                   {tasks.filter(task => !task.completed).length}
                 </p>
               </div>
-              <AlertCircle className="h-8 w-8 text-red-600" />
+              <AlertCircle className="h-6 w-6 md:h-8 md:w-8 text-red-600" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="col-span-2 md:col-span-1">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Completed Courses</p>
-                <p className="text-2xl font-bold text-black">{completedCourses.length}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">Completed Courses</p>
+                <p className="text-lg md:text-2xl font-bold text-black">{completedCourses.length}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <CheckCircle className="h-6 w-6 md:h-8 md:w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
@@ -391,20 +479,20 @@ export default function CoursesPage() {
           <h2 className="text-xl font-semibold text-black mb-4">Current Course (This Week)</h2>
           <Card className="border-2 border-red-200 bg-red-50/30">
             <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="font-serif text-xl text-black">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="font-serif text-lg sm:text-xl text-black">
                     {activeCourse.code}: {activeCourse.title}
                   </CardTitle>
                   <div className="flex items-center mt-2 text-sm text-gray-600">
                     <User className="h-4 w-4 mr-1" />
                     {activeCourse.instructor}
                   </div>
-                  <Badge className="mt-2 bg-green-100 text-green-800 border-green-200">
+                  <Badge className="mt-2 bg-green-100 text-green-800 border-green-200 w-fit">
                     Active
                   </Badge>
                 </div>
-                <Badge variant="outline" className="text-red-600 border-red-600">
+                <Badge variant="outline" className="text-red-600 border-red-600 w-fit">
                   {activeCourse.credits} Credits
                 </Badge>
               </div>
@@ -423,18 +511,18 @@ export default function CoursesPage() {
 
               <div className="grid grid-cols-1 gap-2 text-sm">
                 <div className="flex items-center text-gray-600">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  {activeCourse.schedule} • {activeCourse.location}
+                  <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">{activeCourse.schedule} • {activeCourse.location}</span>
                 </div>
                 <div className="flex items-center text-gray-600">
-                  <Clock className="h-4 w-4 mr-2" />
-                  Next class: {new Date(activeCourse.nextClass).toLocaleDateString()}
+                  <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span>Next class: {new Date(activeCourse.nextClass).toLocaleDateString()}</span>
                 </div>
               </div>
 
               <div className="flex items-center justify-end pt-4 border-t">
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   className="bg-red-600 hover:bg-red-700"
                   onClick={() => viewCourse(activeCourse)}
                 >
@@ -453,38 +541,38 @@ export default function CoursesPage() {
           {tasks.map((task) => (
             <Card key={task.id} className={`${task.completed ? 'opacity-60' : ''} ${isOverdue(task.dueDate) && !task.completed ? 'border-red-300 bg-red-50/30' : ''}`}>
               <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      {task.completed ? (
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                      ) : (
-                        <AlertCircle className={`h-5 w-5 ${isOverdue(task.dueDate) ? 'text-red-600' : 'text-yellow-600'}`} />
-                      )}
-                      <h3 className={`font-medium ${task.completed ? 'line-through text-gray-500' : 'text-black'}`}>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-2">
+                    {task.completed ? (
+                      <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    ) : (
+                      <AlertCircle className={`h-5 w-5 ${isOverdue(task.dueDate) ? 'text-red-600' : 'text-yellow-600'} mt-0.5 flex-shrink-0`} />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`font-medium text-sm md:text-base ${task.completed ? 'line-through text-gray-500' : 'text-black'}`}>
                         {task.title}
                       </h3>
                     </div>
-                    
-                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
-                      <span className="font-medium">{task.courseName}</span>
-                      <Badge className={getPriorityColor(task.priority)}>
-                        {task.priority} priority
-                      </Badge>
-                      <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-1" />
-                        Due: {new Date(task.dueDate).toLocaleDateString()}
-                        {isOverdue(task.dueDate) && !task.completed && (
-                          <span className="ml-2 text-red-600 font-medium">(Overdue)</span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <p className="text-sm text-gray-700">{task.description}</p>
                   </div>
-                  
-                  <div className="ml-4">
-                    <Button size="sm" variant="outline">
+
+                  <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm text-gray-600">
+                    <span className="font-medium">{task.courseName}</span>
+                    <Badge className={`${getPriorityColor(task.priority)} text-xs`}>
+                      {task.priority} priority
+                    </Badge>
+                    <div className="flex items-center">
+                      <Clock className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                      Due: {new Date(task.dueDate).toLocaleDateString()}
+                      {isOverdue(task.dueDate) && !task.completed && (
+                        <span className="ml-2 text-red-600 font-medium">(Overdue)</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <p className="text-xs md:text-sm text-gray-700">{task.description}</p>
+
+                  <div className="flex justify-end pt-2 border-t">
+                    <Button size="sm" variant="outline" className="text-xs">
                       View Details
                     </Button>
                   </div>
@@ -498,7 +586,7 @@ export default function CoursesPage() {
       {/* All Courses Overview */}
       <div>
         <h2 className="text-xl font-semibold text-black mb-4">All Courses</h2>
-        
+
         {/* Upcoming Courses */}
         {upcomingCourses.length > 0 && (
           <div className="mb-6">
@@ -507,20 +595,20 @@ export default function CoursesPage() {
               {upcomingCourses.map((course) => (
                 <Card key={course.id} className="opacity-75">
                   <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="font-serif text-lg text-black">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="font-serif text-base sm:text-lg text-black">
                           {course.code}: {course.title}
                         </CardTitle>
                         <div className="flex items-center mt-2 text-sm text-gray-600">
                           <User className="h-4 w-4 mr-1" />
                           {course.instructor}
                         </div>
-                        <Badge className="mt-2 bg-blue-100 text-blue-800 border-blue-200">
+                        <Badge className="mt-2 bg-blue-100 text-blue-800 border-blue-200 w-fit">
                           Upcoming
                         </Badge>
                       </div>
-                      <Badge variant="outline" className="text-red-600 border-red-600">
+                      <Badge variant="outline" className="text-red-600 border-red-600 w-fit">
                         {course.credits} Credits
                       </Badge>
                     </div>
@@ -548,31 +636,32 @@ export default function CoursesPage() {
               {completedCourses.map((course) => (
                 <Card key={course.id} className="opacity-60">
                   <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="font-serif text-lg text-black">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="font-serif text-base sm:text-lg text-black">
                           {course.code}: {course.title}
                         </CardTitle>
                         <div className="flex items-center mt-2 text-sm text-gray-600">
                           <User className="h-4 w-4 mr-1" />
                           {course.instructor}
                         </div>
-                        <Badge className="mt-2 bg-green-100 text-green-800 border-green-200">
+                        <Badge className="mt-2 bg-green-100 text-green-800 border-green-200 w-fit">
                           Completed
                         </Badge>
                       </div>
-                      <Badge variant="outline" className="text-red-600 border-red-600">
+                      <Badge variant="outline" className="text-red-600 border-red-600 w-fit">
                         {course.credits} Credits
                       </Badge>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-center justify-between">
-                      <p className="text-gray-700 text-sm">{course.description}</p>
-                      <Button 
-                        size="sm" 
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                      <p className="text-gray-700 text-sm flex-1">{course.description}</p>
+                      <Button
+                        size="sm"
                         variant="outline"
                         onClick={() => viewCourse(course)}
+                        className="w-full sm:w-auto"
                       >
                         View Details
                       </Button>
