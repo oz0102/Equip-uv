@@ -1,0 +1,788 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card"
+import { Badge } from "@/shared/ui/badge"
+import { Button } from "@/shared/ui/button"
+import { Input } from "@/shared/ui/input"
+import { Textarea } from "@/shared/ui/textarea"
+import { Switch } from "@/shared/ui/switch"
+import { Calendar } from "@/shared/ui/calendar"
+import { BookOpen, Clock, Heart, Users, Award, Target, TrendingUp, CalendarDays, Filter, ChevronLeft, ChevronRight } from "lucide-react"
+import { useState } from "react"
+
+// Define types for better type safety
+interface DailyProgress {
+  bibleStudy: {
+    completed: boolean;
+    chaptersRead: number;
+    keyLesson: string;
+  };
+  prayer: {
+    completed: boolean;
+    minutesPrayed: number;
+    notes: string;
+  };
+}
+
+interface WeeklyProgress {
+  prayerStretch: {
+    completed: boolean;
+    duration: number;
+    reflection: string;
+  };
+  evangelism: {
+    completed: boolean;
+    peopleReached: number;
+    soulsWon: number;
+    testimony: string;
+  };
+}
+
+export function Tracker() {
+  // Calendar and filtering state
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+  const [filterMode, setFilterMode] = useState<"day" | "week">("day")
+  const [showCalendar, setShowCalendar] = useState(false)
+
+  // Admin-set targets
+  const adminTargets = {
+    bibleStudy: { chapters: 2, description: "2 chapters daily" },
+    prayer: { minutes: 30, description: "30 minutes daily" },
+    prayerStretch: { minutes: 120, description: "120 minutes weekly" },
+    evangelism: { people: 5, description: "Reach 5 people weekly" }
+  }
+
+  // Helper functions for date manipulation
+  const getWeekStart = (date: Date) => {
+    const d = new Date(date)
+    const day = d.getDay()
+    const diff = d.getDate() - day
+    return new Date(d.setDate(diff))
+  }
+
+  const getWeekEnd = (date: Date) => {
+    const weekStart = getWeekStart(date)
+    const weekEnd = new Date(weekStart)
+    weekEnd.setDate(weekStart.getDate() + 6)
+    return weekEnd
+  }
+
+  const formatDateRange = (start: Date, end: Date) => {
+    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
+    return `${start.toLocaleDateString('en-US', options)} - ${end.toLocaleDateString('en-US', options)}`
+  }
+
+  const getCurrentDisplayDate = () => {
+    if (!selectedDate) return "Today"
+    
+    if (filterMode === "day") {
+      return selectedDate.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        month: 'long', 
+        day: 'numeric',
+        year: 'numeric'
+      })
+    } else {
+      const weekStart = getWeekStart(selectedDate)
+      const weekEnd = getWeekEnd(selectedDate)
+      return `Week of ${formatDateRange(weekStart, weekEnd)}`
+    }
+  }
+
+  // Fixed: Added the setter for dailyProgress
+  const [dailyProgress, setDailyProgress] = useState<DailyProgress>({
+    bibleStudy: {
+      completed: true,
+      chaptersRead: 3,
+      keyLesson: "Romans 8:28 - God works all things for good. Even in trials, His purpose prevails."
+    },
+    prayer: {
+      completed: true,
+      minutesPrayed: 45,
+      notes: "Prayed for family, church leadership, and personal guidance for ministry decisions."
+    }
+  })
+
+  const [weeklyProgress, setWeeklyProgress] = useState<WeeklyProgress>({
+    prayerStretch: {
+      completed: true,
+      duration: 135,
+      reflection: "Spent extended time in intercession for the church's upcoming outreach event. Felt led to pray specifically for breakthrough in our community."
+    },
+    evangelism: {
+      completed: true,
+      peopleReached: 7,
+      soulsWon: 2,
+      testimony: "Shared gospel with colleagues at work. Two accepted Christ! Praise God for divine appointments and open hearts."
+    }
+  })
+
+  // Calculate overall stats
+  const overallStats = {
+    bibleStudyStreak: 12,
+    prayerStreak: 15,
+    weeklyGoalsCompleted: 8,
+    totalSoulsWon: 18,
+    completionRate: 89
+  }
+
+  const getProgressColor = (achieved: number, target: number) => {
+    const percentage = (achieved / target) * 100
+    if (percentage >= 100) return "text-green-600"
+    if (percentage >= 80) return "text-blue-600"
+    if (percentage >= 60) return "text-yellow-600"
+    return "text-red-600"
+  }
+
+  const getProgressBg = (achieved: number, target: number) => {
+    const percentage = (achieved / target) * 100
+    if (percentage >= 100) return "bg-green-100"
+    if (percentage >= 80) return "bg-blue-100"
+    if (percentage >= 60) return "bg-yellow-100"
+    return "bg-red-100"
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-2 md:space-y-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 font-serif">Discipleship Growth Tracker</h1>
+          <div className="bg-blue-50 p-4 md:p-6 rounded-lg border-l-4 border-blue-400">
+            <p className="text-blue-800 font-medium italic">
+              "Therefore, if anyone is in Christ, the new creation has come: The old has gone, the new is here!"
+            </p>
+            <p className="text-blue-600 text-sm mt-1">- 2 Corinthians 5:17</p>
+            <p className="text-blue-700 text-sm mt-2">
+              Keep pressing forward in your spiritual journey. Every step counts toward becoming who God has called you to be!
+            </p>
+          </div>
+        </div>
+
+        {/* Overall Progress Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-lg col-span-2 md:col-span-1">
+            <CardContent className="p-4 md:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs md:text-sm font-medium text-green-700">Completion Rate</p>
+                  <p className="text-2xl md:text-3xl font-bold text-green-800">{overallStats.completionRate}%</p>
+                </div>
+                <Target className="h-6 w-6 md:h-8 md:w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg">
+            <CardContent className="p-4 md:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs md:text-sm font-medium text-blue-700">Bible Study Streak</p>
+                  <p className="text-2xl md:text-3xl font-bold text-blue-800">{overallStats.bibleStudyStreak}</p>
+                </div>
+                <BookOpen className="h-6 w-6 md:h-8 md:w-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 shadow-lg">
+            <CardContent className="p-4 md:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs md:text-sm font-medium text-purple-700">Prayer Streak</p>
+                  <p className="text-2xl md:text-3xl font-bold text-purple-800">{overallStats.prayerStreak}</p>
+                </div>
+                <Heart className="h-6 w-6 md:h-8 md:w-8 text-purple-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 shadow-lg">
+            <CardContent className="p-4 md:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs md:text-sm font-medium text-orange-700">Weekly Goals</p>
+                  <p className="text-2xl md:text-3xl font-bold text-orange-800">{overallStats.weeklyGoalsCompleted}</p>
+                </div>
+                <Award className="h-6 w-6 md:h-8 md:w-8 text-orange-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 shadow-lg">
+            <CardContent className="p-4 md:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs md:text-sm font-medium text-red-700">Souls Won</p>
+                  <p className="text-2xl md:text-3xl font-bold text-red-800">{overallStats.totalSoulsWon}</p>
+                </div>
+                <Users className="h-6 w-6 md:h-8 md:w-8 text-red-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Calendar Filter Section */}
+        <Card>
+          <CardHeader className="pb-4">
+            <div className="flex flex-col space-y-3 md:flex-row md:items-center md:justify-between md:space-y-0">
+              <CardTitle className="font-serif text-base md:text-lg flex items-center">
+                <CalendarDays className="h-5 w-5 mr-2" />
+                Date & Period Selection
+              </CardTitle>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant={filterMode === "day" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFilterMode("day")}
+                  className="text-xs px-3"
+                >
+                  Daily
+                </Button>
+                <Button
+                  variant={filterMode === "week" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFilterMode("week")}
+                  className="text-xs px-3"
+                >
+                  Weekly
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-4">
+              {/* Current Selection Display */}
+              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-sm font-medium text-blue-800 break-words">
+                  {getCurrentDisplayDate()}
+                </p>
+                {filterMode === "week" && selectedDate && (
+                  <p className="text-xs text-blue-600 mt-1">
+                    {getWeekStart(selectedDate).toLocaleDateString()} - {getWeekEnd(selectedDate).toLocaleDateString()}
+                  </p>
+                )}
+              </div>
+
+              {/* Mobile Navigation Controls */}
+              <div className="block md:hidden">
+                {filterMode === "week" && (
+                  <div className="flex items-center justify-between gap-2 mb-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (selectedDate) {
+                          const prevWeek = new Date(selectedDate)
+                          prevWeek.setDate(selectedDate.getDate() - 7)
+                          setSelectedDate(prevWeek)
+                        }
+                      }}
+                      className="flex items-center text-xs px-3"
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-1" />
+                      Previous
+                    </Button>
+                    <span className="text-xs text-slate-600 font-medium">Week Navigation</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (selectedDate) {
+                          const nextWeek = new Date(selectedDate)
+                          nextWeek.setDate(selectedDate.getDate() + 7)
+                          setSelectedDate(nextWeek)
+                        }
+                      }}
+                      className="flex items-center text-xs px-3"
+                    >
+                      Next
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Control Buttons */}
+              <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const today = new Date()
+                    setSelectedDate(today)
+                  }}
+                  className="w-full md:w-auto text-xs"
+                >
+                  Go to Today
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCalendar(!showCalendar)}
+                  className="w-full md:w-auto text-xs"
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  {showCalendar ? "Hide" : "Show"} Calendar
+                </Button>
+
+                {/* Desktop Week Navigation */}
+                {filterMode === "week" && (
+                  <div className="hidden md:flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (selectedDate) {
+                          const prevWeek = new Date(selectedDate)
+                          prevWeek.setDate(selectedDate.getDate() - 7)
+                          setSelectedDate(prevWeek)
+                        }
+                      }}
+                      className="text-xs"
+                    >
+                      Previous Week
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (selectedDate) {
+                          const nextWeek = new Date(selectedDate)
+                          nextWeek.setDate(selectedDate.getDate() + 7)
+                          setSelectedDate(nextWeek)
+                        }
+                      }}
+                      className="text-xs"
+                    >
+                      Next Week
+                    </Button>
+                  </div>
+                )}
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedDate(undefined)}
+                  className="w-full md:w-auto text-xs"
+                >
+                  Clear Filter
+                </Button>
+              </div>
+
+              {/* Calendar Display */}
+              {showCalendar && (
+                <div className="mt-4">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    className="rounded-md border w-full mx-auto"
+                  />
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Daily Goals Section */}
+        {filterMode === "day" && (
+          <Card className="shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="font-serif text-base md:text-xl flex items-center">
+                <TrendingUp className="h-5 w-5 mr-2" />
+                Daily Spiritual Goals - {selectedDate?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </CardTitle>
+              <p className="text-sm text-gray-600">Spiritual disciplines and progress for {getCurrentDisplayDate()}</p>
+            </CardHeader>
+            <CardContent className="p-4 md:p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                {/* Bible Study Card */}
+                <Card className="border-l-4 border-l-blue-500 shadow-lg">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base md:text-lg flex items-center">
+                        <BookOpen className="h-5 w-5 mr-2 text-blue-600" />
+                        Bible Study
+                      </CardTitle>
+                      <Badge className="bg-blue-100 text-blue-800 text-xs">
+                        Target: {adminTargets.bibleStudy.description}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4 md:p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Did you study today?</label>
+                      <Switch 
+                        checked={dailyProgress.bibleStudy.completed} 
+                        onCheckedChange={(checked) => setDailyProgress((prev: DailyProgress) => ({
+                          ...prev,
+                          bibleStudy: { ...prev.bibleStudy, completed: checked }
+                        }))}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Chapters read:</label>
+                      <Input
+                        type="number"
+                        value={dailyProgress.bibleStudy.chaptersRead}
+                        onChange={(e) => setDailyProgress((prev: DailyProgress) => ({
+                          ...prev,
+                          bibleStudy: { ...prev.bibleStudy, chaptersRead: parseInt(e.target.value) || 0 }
+                        }))}
+                        className="w-20"
+                        min="0"
+                      />
+                      <div className={`text-sm ${getProgressColor(dailyProgress.bibleStudy.chaptersRead, adminTargets.bibleStudy.chapters)}`}>
+                        {dailyProgress.bibleStudy.chaptersRead}/{adminTargets.bibleStudy.chapters} chapters
+                        {dailyProgress.bibleStudy.chaptersRead >= adminTargets.bibleStudy.chapters && " ✅ Goal exceeded!"}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Key lesson / highlight verse:</label>
+                      <Textarea
+                        value={dailyProgress.bibleStudy.keyLesson}
+                        onChange={(e) => setDailyProgress((prev: DailyProgress) => ({
+                          ...prev,
+                          bibleStudy: { ...prev.bibleStudy, keyLesson: e.target.value }
+                        }))}
+                        className="min-h-20"
+                        placeholder="Share what God revealed to you today..."
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Prayer Card */}
+                <Card className="border-l-4 border-l-purple-500 shadow-lg">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base md:text-lg flex items-center">
+                        <Heart className="h-5 w-5 mr-2 text-purple-600" />
+                        Prayer
+                      </CardTitle>
+                      <Badge className="bg-purple-100 text-purple-800 text-xs">
+                        Target: {adminTargets.prayer.description}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4 md:p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Did you pray today?</label>
+                      <Switch 
+                        checked={dailyProgress.prayer.completed}
+                        onCheckedChange={(checked) => setDailyProgress((prev: DailyProgress) => ({
+                          ...prev,
+                          prayer: { ...prev.prayer, completed: checked }
+                        }))}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Minutes prayed:</label>
+                      <Input
+                        type="number"
+                        value={dailyProgress.prayer.minutesPrayed}
+                        onChange={(e) => setDailyProgress((prev: DailyProgress) => ({
+                          ...prev,
+                          prayer: { ...prev.prayer, minutesPrayed: parseInt(e.target.value) || 0 }
+                        }))}
+                        className="w-20"
+                        min="0"
+                      />
+                      <div className={`text-sm ${getProgressColor(dailyProgress.prayer.minutesPrayed, adminTargets.prayer.minutes)}`}>
+                        {dailyProgress.prayer.minutesPrayed}/{adminTargets.prayer.minutes} minutes
+                        {dailyProgress.prayer.minutesPrayed >= adminTargets.prayer.minutes && " ✅ Goal exceeded!"}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Prayer notes:</label>
+                      <Textarea
+                        value={dailyProgress.prayer.notes}
+                        onChange={(e) => setDailyProgress((prev: DailyProgress) => ({
+                          ...prev,
+                          prayer: { ...prev.prayer, notes: e.target.value }
+                        }))}
+                        className="min-h-20"
+                        placeholder="Record your prayer requests, praise reports, or insights..."
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Weekly Goals Section */}
+        {filterMode === "week" && (
+          <Card className="shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="font-serif text-base md:text-xl flex items-center">
+                <Award className="h-5 w-5 mr-2" />
+                Weekly Spiritual Goals - {selectedDate && formatDateRange(getWeekStart(selectedDate), getWeekEnd(selectedDate))}
+              </CardTitle>
+              <p className="text-sm text-gray-600">Extended spiritual commitments for {getCurrentDisplayDate()}</p>
+            </CardHeader>
+            <CardContent className="p-4 md:p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                {/* Prayer Stretch Card */}
+                <Card className="border-l-4 border-l-green-500 shadow-lg">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base md:text-lg flex items-center">
+                        <Clock className="h-5 w-5 mr-2 text-green-600" />
+                        Prayer Stretch
+                      </CardTitle>
+                      <Badge className="bg-green-100 text-green-800 text-xs">
+                        Target: {adminTargets.prayerStretch.description}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4 md:p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Completed this week?</label>
+                      <Switch 
+                        checked={weeklyProgress.prayerStretch.completed}
+                        onCheckedChange={(checked) => setWeeklyProgress((prev: WeeklyProgress) => ({
+                          ...prev,
+                          prayerStretch: { ...prev.prayerStretch, completed: checked }
+                        }))}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Duration prayed (minutes):</label>
+                      <Input
+                        type="number"
+                        value={weeklyProgress.prayerStretch.duration}
+                        onChange={(e) => setWeeklyProgress((prev: WeeklyProgress) => ({
+                          ...prev,
+                          prayerStretch: { ...prev.prayerStretch, duration: parseInt(e.target.value) || 0 }
+                        }))}
+                        className="w-24"
+                        min="0"
+                      />
+                      <div className={`text-sm ${getProgressColor(weeklyProgress.prayerStretch.duration, adminTargets.prayerStretch.minutes)}`}>
+                        {weeklyProgress.prayerStretch.duration}/{adminTargets.prayerStretch.minutes} minutes
+                        {weeklyProgress.prayerStretch.duration >= adminTargets.prayerStretch.minutes && " ✅ Goal exceeded!"}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Reflection:</label>
+                      <Textarea
+                        value={weeklyProgress.prayerStretch.reflection}
+                        onChange={(e) => setWeeklyProgress((prev: WeeklyProgress) => ({
+                          ...prev,
+                          prayerStretch: { ...prev.prayerStretch, reflection: e.target.value }
+                        }))}
+                        className="min-h-20"
+                        placeholder="How did extended prayer time impact you this week?"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Evangelism Card */}
+                <Card className="border-l-4 border-l-red-500 shadow-lg">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base md:text-lg flex items-center">
+                        <Users className="h-5 w-5 mr-2 text-red-600" />
+                        Evangelism
+                      </CardTitle>
+                      <Badge className="bg-red-100 text-red-800 text-xs">
+                        Target: {adminTargets.evangelism.description}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4 md:p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Did you evangelize this week?</label>
+                      <Switch 
+                        checked={weeklyProgress.evangelism.completed}
+                        onCheckedChange={(checked) => setWeeklyProgress((prev: WeeklyProgress) => ({
+                          ...prev,
+                          evangelism: { ...prev.evangelism, completed: checked }
+                        }))}
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">People reached:</label>
+                        <Input
+                          type="number"
+                          value={weeklyProgress.evangelism.peopleReached}
+                          onChange={(e) => setWeeklyProgress((prev: WeeklyProgress) => ({
+                            ...prev,
+                            evangelism: { ...prev.evangelism, peopleReached: parseInt(e.target.value) || 0 }
+                          }))}
+                          className="w-20"
+                          min="0"
+                        />
+                        <div className={`text-sm ${getProgressColor(weeklyProgress.evangelism.peopleReached, adminTargets.evangelism.people)}`}>
+                          {weeklyProgress.evangelism.peopleReached}/{adminTargets.evangelism.people}
+                          {weeklyProgress.evangelism.peopleReached >= adminTargets.evangelism.people && " ✅"}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Souls won:</label>
+                        <Input
+                          type="number"
+                          value={weeklyProgress.evangelism.soulsWon}
+                          onChange={(e) => setWeeklyProgress((prev: WeeklyProgress) => ({
+                            ...prev,
+                            evangelism: { ...prev.evangelism, soulsWon: parseInt(e.target.value) || 0 }
+                          }))}
+                          className="w-20"
+                          min="0"
+                        />
+                        <div className="text-sm text-green-600 font-medium">
+                          🎉 {weeklyProgress.evangelism.soulsWon} souls!
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Testimony / experience:</label>
+                      <Textarea
+                        value={weeklyProgress.evangelism.testimony}
+                        onChange={(e) => setWeeklyProgress((prev: WeeklyProgress) => ({
+                          ...prev,
+                          evangelism: { ...prev.evangelism, testimony: e.target.value }
+                        }))}
+                        className="min-h-20"
+                        placeholder="Share your evangelism experiences and testimonies..."
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Progress Summary */}
+        <Card className="shadow-lg">
+          <CardHeader className="pb-4">
+            <CardTitle className="font-serif text-base md:text-xl flex items-center">
+              <TrendingUp className="h-5 w-5 mr-2" />
+              Growth Summary & Achievements
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 md:p-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+              {/* Progress Bars */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-base">Current Week Progress</h4>
+                
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between text-xs md:text-sm mb-1">
+                      <span>Bible Study</span>
+                      <span className="text-green-600">150%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-green-600 h-2 rounded-full" style={{width: '100%'}}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs md:text-sm mb-1">
+                      <span>Daily Prayer</span>
+                      <span className="text-green-600">150%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-green-600 h-2 rounded-full" style={{width: '100%'}}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs md:text-sm mb-1">
+                      <span>Prayer Stretch</span>
+                      <span className="text-green-600">112%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-green-600 h-2 rounded-full" style={{width: '100%'}}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs md:text-sm mb-1">
+                      <span>Evangelism</span>
+                      <span className="text-green-600">140%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-green-600 h-2 rounded-full" style={{width: '100%'}}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Achievements */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-base">Recent Achievements</h4>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <Award className="h-5 w-5 text-yellow-600" />
+                    <div>
+                      <p className="text-xs md:text-sm font-medium">Bible Study Champion</p>
+                      <p className="text-xs text-gray-600">12-day streak</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-2 bg-purple-50 rounded-lg border border-purple-200">
+                    <Heart className="h-5 w-5 text-purple-600" />
+                    <div>
+                      <p className="text-xs md:text-sm font-medium">Prayer Warrior</p>
+                      <p className="text-xs text-gray-600">15-day streak</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-2 bg-red-50 rounded-lg border border-red-200">
+                    <Users className="h-5 w-5 text-red-600" />
+                    <div>
+                      <p className="text-xs md:text-sm font-medium">Soul Winner</p>
+                      <p className="text-xs text-gray-600">18 souls won this cohort</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Encouragement */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-base">Keep Growing!</h4>
+                
+                <div className="space-y-3">
+                  <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-xs md:text-sm font-medium text-green-800">Excellent Progress!</p>
+                    <p className="text-xs text-green-600 mt-1">
+                      You're exceeding all your goals. Your dedication to spiritual growth is inspiring!
+                    </p>
+                  </div>
+
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-xs md:text-sm font-medium text-blue-800">Next Milestone</p>
+                    <p className="text-xs text-blue-600 mt-1">
+                      3 more days to reach a 20-day prayer streak. You can do it!
+                    </p>
+                  </div>
+
+                  <Button className="w-full text-xs md:text-base">
+                    View Detailed Analytics
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
