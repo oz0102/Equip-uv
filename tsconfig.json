@@ -11,10 +11,10 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./client/*"]
     },
-    "noEmit": true    // 🔑 prevents .js files from being output
+    "noEmit": true
   },
-  "include": ["src"],
+  "include": ["client"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
